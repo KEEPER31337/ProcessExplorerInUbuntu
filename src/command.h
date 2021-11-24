@@ -5,15 +5,20 @@
 
 using namespace std;
 
-class Command {
+class Command
+{
 public:
-    enum Mode { PRINTPROCINFO , CLEAR };
+    enum Mode
+    {
+        PRINTPROCINFO,
+        CLEAR
+    };
     Command();
-    int getProcNum(void);
+    int getProcNum(void) const;
     vector<ProcInfo> &getProcInfo(void) const;
     void updateProcStat(void);
     double getCpuTime(ulong utime, ulong stime, ulong starttime, int seconds);
-    string getStartTime(ulong uptime,ulong stime);
+    string getStartTime(ulong uptime, ulong stime);
     void setSysInfo(void);
     void printProc(void) const;
     void setMode(Mode m);
