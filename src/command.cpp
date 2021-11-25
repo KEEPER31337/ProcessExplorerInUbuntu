@@ -179,3 +179,78 @@ string Command::GetUserName(char *filepath)
     }
 }
 
+string Command::GetHelp(string cmdFunc)
+{
+    switch(cmdFunc)
+    {
+        case 'info':
+            return "info [PID]: this command display the information of processs' detail informain";
+            break;
+        case 'path':
+            return "path [PID] : this command display the path of each process";
+            break;
+        case 'viruscheck':
+            return "viruscheck [PID] : this command check a status which process is infection";
+            break;
+        case 'restart':
+            return "restart [PID] : this command restarts the process";
+            break;
+        case 'sendsignal':
+            return "sendsignal [PID] [SGINAL_NUM] : this command send a signal";
+            break;
+        case 'search':
+            return "search [PID] [KEYWORD] : this command search the process using keyword";
+            break;
+        default:
+            return "info [PID]: this command display the information of processs' detail informain\n\
+            path [PID] : this command display the path of each process\n\
+            viruscheck [PID] : this command check a status which process is infection\n\
+            restart [PID] : this command restarts the process\n\
+            sendsignal [PID] [SGINAL_NUM] : this command send a signal\n\
+            search [PID] [KEYWORD] : this command search the process using keyword";
+            break;
+    }
+}
+
+void Command::SendSignal(int PID, int signalNum)
+{
+    kill(PID, signalNum);
+}
+
+void Command::RestartProc(int PID, std::string pathProc)
+{
+    char *runCMD;
+    
+    kill(PID, 9);
+
+    strcpy(runCMD, pathProc.c_str());
+    system(runCMD);
+}
+
+ProcInfo Command::GetProcInfoByPID(int PID)
+{
+    ProcInfo selecProc;
+
+    vector<ProcInfo>::iterator ptr;
+    for(ptr = mProcInfo->begin(); ptr != mProcInfo->end(); ++ptr)
+    {
+        if(ptr->pid == PID) 
+        {
+            selecProc.pid = ptr->pid;
+            selecProc.ppid = ptr->ppid;
+            selecProc.state = ptr->state;
+            selecProc.comm = ptr->comm;
+            selecProc.start = ptr->start;
+        }
+        else if(ptr->ppid == PID) 
+        {
+            selecProc.pid = ptr->pid;
+            selecProc.ppid = ptr->ppid;
+            selecProc.state = ptr->state;
+            selecProc.comm = ptr->comm;
+            selecProc.start = ptr->start;
+        }
+    }
+    
+    return selecProc;
+}
