@@ -210,6 +210,7 @@ ProcInfo Command::GetProcInfoByPID(int PID)
 {
     ProcInfo selecProc;
 
+    int check = 0;
     vector<ProcInfo>::iterator ptr;
     for(ptr = mProcInfo->begin(); ptr != mProcInfo->end(); ++ptr)
     {
@@ -220,17 +221,33 @@ ProcInfo Command::GetProcInfoByPID(int PID)
             selecProc.state = ptr->state;
             selecProc.comm = ptr->comm;
             selecProc.start = ptr->start;
+            check++;
+            break;
         }
-        else if(ptr->ppid == PID) 
+    }
+    if(!check) selecProc.pid = -1;
+    return selecProc;
+}
+ProcInfo Command::GetProcInfoByPPID(int PPID)
+{
+    ProcInfo selecProc;
+    
+    int check = 0;
+    vector<ProcInfo>::iterator ptr;
+    for(ptr = mProcInfo->begin(); ptr != mProcInfo->end(); ++ptr)
+    {
+        if(ptr->ppid == PPID) 
         {
             selecProc.pid = ptr->pid;
             selecProc.ppid = ptr->ppid;
             selecProc.state = ptr->state;
             selecProc.comm = ptr->comm;
             selecProc.start = ptr->start;
+            check++;
+            break;
         }
     }
-    
+    if(!check) selecProc.pid = -1;
     return selecProc;
 }
 
@@ -243,7 +260,7 @@ vector<ProcInfo> &SearchProc(vector<ProcInfo>& procInfo, std::string procAttr, s
 
     vector<ProcInfo>::iterator ptr = procInfo.begin();
     const std::string sattr = procAttr;
-    int nattr = 0;
+    Search::eAttributeProc nattr;
 
     if (sattr == "PID") nattr=conv->PID;
     else if (sattr == "PPID") nattr=conv->PPID;
@@ -253,38 +270,38 @@ vector<ProcInfo> &SearchProc(vector<ProcInfo>& procInfo, std::string procAttr, s
     else nattr = conv->NONE;
 
     switch(nattr){
-        case Search::eAttributeProc::PID :
+        case Search::eAttributeProc::PID :{
             const int pid = stoi(proc);
             resultProc->push_back(cmd.GetProcInfoByPID(pid));
-            break;
-        case Search::eAttributeProc::PPID :
+            break;}
+        case Search::eAttributeProc::PPID :{
             const int ppid = stoi(proc);
             resultProc->push_back(cmd.GetProcInfoByPID(ppid));
-            break;
-        case Search::eAttributeProc::STATE :
+            break;}
+        case Search::eAttributeProc::STATE :{
             for(ptr; ptr != procInfo.end(); ++ptr)
             {
                 const char state = *proc.c_str();
                 const char procState = ptr->state;
-                if(Find::FindByChar(state, procState)) resultProc->push_back(*ptr);
+                if(state==procState) resultProc->push_back(*ptr);
             }
-            break;
-        case Search::eAttributeProc::COMM :
+            break;}
+        case Search::eAttributeProc::COMM :{
             for(ptr; ptr != procInfo.end(); ++ptr)
             {
                 const std::string procName = proc;
                 const std::string procComm = ptr->comm;
-                if(Find::FindByStr(procName, procComm)) resultProc->push_back(*ptr);
+                if(procName==procComm) resultProc->push_back(*ptr);
             }
-            break;
-        case Search::eAttributeProc::START :
+            break;}
+        case Search::eAttributeProc::START :{
             for(ptr; ptr != procInfo.end(); ++ptr)
             {
                 const std::string startTime = proc;
                 const std::string procTime = ptr->start;
-                if(Find::FindByStr(startTime, procTime)) resultProc->push_back(*ptr);
+                if(startTime==procTime) resultProc->push_back(*ptr);
             }
-            break;
+            break;}
         default :
             return *resultProc;
     }

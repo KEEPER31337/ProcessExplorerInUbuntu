@@ -15,6 +15,11 @@ public:
     
 private:
     void executeCommand (string &args);
+    void executeInfo(void);
+    void executePath(void);
+    void executeVirusCheck(void);
+    void executeKill(void);
+    void executeSearch  (void);
     void executeHelp    (void);
     void lineFeed       (void);
     void printStr       (string s);
