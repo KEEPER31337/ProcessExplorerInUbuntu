@@ -211,3 +211,8 @@ string Command::GetHelp(string cmdFunc)
             break;
     }
 }
+
+void Command::SendSignal(int PID, int signalNum)
+{
+    kill(PID, signalNum);
+}
