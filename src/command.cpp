@@ -216,3 +216,13 @@ void Command::SendSignal(int PID, int signalNum)
 {
     kill(PID, signalNum);
 }
+
+void Command::RestartProc(int PID, std::string pathProc)
+{
+    char *runCMD;
+    
+    kill(PID, 9);
+
+    strcpy(runCMD, pathProc.c_str());
+    system(runCMD);
+}
