@@ -4,14 +4,14 @@
 #include <stdio.h>
 #include "processinfo.h"
 
-ProcInfo getProcInfoByPID(vector<ProcInfo> procInfo, int pid)
+ProcInfo getProcInfoByPID(vector<ProcInfo> procInfo, int PID)
 {
     ProcInfo selecProc;
 
     vector<ProcInfo>::iterator ptr;
     for(ptr = procInfo.begin(); ptr != procInfo.end(); ++ptr)
     {
-        if(ptr->pid == pid) 
+        if(ptr->pid == PID) 
         {
             selecProc.pid = ptr->pid;
             selecProc.ppid = ptr->ppid;
