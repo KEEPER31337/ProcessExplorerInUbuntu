@@ -4,17 +4,15 @@
 #include <string.h>
 #include <stdlib.h>
 
-using namespace std;
+void RestartProc(int PID, std::string pathProc){
 
-void Restart(int pid, string path){
-
-    char kill_cmd[1024];
-    char run_cmd[1024];
+    char *killCMD;
+    char *runCMD;
     
-    sprintf(kill_cmd, "kill -9 %d", pid);
-    strcpy(run_cmd, path.c_str());
+    sprintf(killCMD, "kill -9 %d", PID);
+    strcpy(runCMD, pathProc.c_str());
 
-    system(kill_cmd);
-    system(run_cmd);
+    system(killCMD);
+    system(runCMD);
 
 }

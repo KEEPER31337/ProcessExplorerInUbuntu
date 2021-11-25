@@ -23,6 +23,10 @@ public:
     void printProc(void) const;
     void setMode(Mode m);
     Mode getMode(void) const;
+    string Help(void);
+    ProcInfo GetProcInfoByPID(vector<ProcInfo> procInfo,int PID);
+    void SendSignal(int PID, int signalNum);
+    void RestartProc(int PID, string procPath);
 
 private:
     SysInfo *msysinfo;
