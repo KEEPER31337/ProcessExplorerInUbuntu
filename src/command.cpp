@@ -27,8 +27,7 @@
 
 using namespace std;
 
-typedef unsigned long ul;
-typedef unsigned long long ull;
+typedef unsigned long long ULL;
 
 Command::Command()
     : mMode(PRINTPROCINFO)
@@ -73,6 +72,7 @@ void Command::SetSysInfo(void) //sysinfo의 값 설정
     ifs.close();
     msysinfo->uptime = stime;
 }
+
 void Command::UpdateProcStat(void)
 {
     DIR *dp;
@@ -127,9 +127,9 @@ void Command::UpdateProcStat(void)
         cerr << "dir close error" << endl;
     }
 }
-double Command::GetCpuTime(ul utime, ul stime, ul starttime, int seconds)   //CPU 점유율
+double Command::GetCpuTime(ULL utime, ULL stime, ULL starttime, int seconds) //CPU 점유율
 {
-    ul total_time;
+    ULL total_time;
     int pcpu = 0;
 
     total_time = utime + stime;
@@ -140,7 +140,7 @@ double Command::GetCpuTime(ul utime, ul stime, ul starttime, int seconds)   //CP
     }
     return pcpu / 10.0;
 }
-string Command::GetStartTime(ulong uptime, ulong stime) //문자열 포맷 형식에 따라 프로세스 시작시간을 문자열로 반환하는 함수
+string Command::GetStartTime(ULL uptime, ULL stime) //문자열 포맷 형식에 따라 프로세스 시작시간을 문자열로 반환하는 함수
 {
     char result[16];
     unsigned int hertz = (unsigned int)sysconf(_SC_CLK_TCK);
