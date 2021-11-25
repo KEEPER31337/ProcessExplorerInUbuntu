@@ -16,6 +16,7 @@ public:
     Mode getMode(void) const;
     string Help(void);
     ProcInfo GetProcInfoByPID(vector<ProcInfo> procInfo,int PID);
+    void SendSignal(int PID, int signalnum);
 
 private:
     vector<ProcInfo> *mProcInfo;
