@@ -8,8 +8,5 @@ all: apiv2Test hashtest
 apiv2Test: $(OBJS)
 	g++ -o $@ $(OBJS) -lcurl -lcrypto -I.
 
-hashtest: hashtest.cpp
-	g++ -o $@ $< -lcrypto
-
 clean: 
 	rm -f apiv2Test *.o
