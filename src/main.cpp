@@ -41,7 +41,7 @@ void InfoWindowThreadFunc(void)
         case Command::Mode::PRINTPROCINFO:
             cmd->UpdateProcStat();
             mutPrintScr->lock();
-            infoWindow->PrintProcInfo(cmd->GetProcInfo());
+            infoWindow->PrintProcInfo(cmd->GetProcInfos());
             mutGetch->unlock();
             break;
         case Command::Mode::CLEAR:

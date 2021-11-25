@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
 int main(int argc, char *argv[]) {
 	Command cm;
 	cm.UpdateProcStat();
-	vec = cm.GetProcInfo();
+	vec = cm.GetProcInfos();
   QApplication app(argc, argv);
 
   MainWindow window;
