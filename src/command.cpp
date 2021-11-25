@@ -27,13 +27,12 @@
 
 using namespace std;
 
-typedef unsigned long ul;
-typedef unsigned long long ull;
+typedef unsigned long long ULL;
 
 Command::Command()
     : mMode(PRINTPROCINFO)
 {
-    msysinfo = new SysInfo();
+    mSysInfo = new SysInfo();
     SetSysInfo();
     mProcInfo = new vector<ProcInfo>;
 }
@@ -47,32 +46,11 @@ Command::Mode Command::GetMode(void) const
     return mMode; 
 }
 
-int Command::GetProcNum(void) const 
-{ 
-    return mProcInfo->size(); 
-}
-
 vector<ProcInfo> &Command::GetProcInfos(void) const 
 { 
     return *mProcInfo; 
 }
 
-void Command::SetSysInfo(void) //sysinfo의 값 설정
-{
-    FILE *fp;
-    double stime;
-    double idlettime;
-
-    ifstream ifs("/proc/uptime");
-    if (!ifs.is_open())
-    {
-        cerr << "cannot open /proc/uptime" << endl;
-    }
-    
-    ifs >> stime;
-    ifs.close();
-    msysinfo->uptime = stime;
-}
 void Command::UpdateProcStat(void)
 {
     DIR *dp;
@@ -114,8 +92,8 @@ void Command::UpdateProcStat(void)
             ps.ppid     = stoi(t[3]);
             ps.state    = t[2][0];
             ps.comm     = t[1];
-            ps.cpu      = GetCpuTime(stoi(t[13]), stoi(t[14]), stoi(t[21]), msysinfo->uptime);
-            ps.start    = GetStartTime(msysinfo->uptime, stoi(t[21]));
+            ps.cpu      = GetCpuTime(stoi(t[13]), stoi(t[14]), stoi(t[21]), mSysInfo->uptime);
+            ps.start    = GetStartTime(mSysInfo->uptime, stoi(t[21]));
             ps.vmem     = stoi(t[22]);
 
             mProcInfo->push_back(ps);
@@ -127,9 +105,27 @@ void Command::UpdateProcStat(void)
         cerr << "dir close error" << endl;
     }
 }
-double Command::GetCpuTime(ul utime, ul stime, ul starttime, int seconds)   //CPU 점유율
+
+void Command::SetSysInfo(void) //sysinfo의 값 설정
 {
-    ul total_time;
+    FILE *fp;
+    double stime;
+    double idlettime;
+
+    ifstream ifs("/proc/uptime");
+    if (!ifs.is_open())
+    {
+        cerr << "cannot open /proc/uptime" << endl;
+    }
+
+    ifs >> stime;
+    ifs.close();
+    mSysInfo->uptime = stime;
+}
+
+double Command::GetCpuTime(ULL utime, ULL stime, ULL starttime, int seconds) //CPU 점유율
+{
+    ULL total_time;
     int pcpu = 0;
 
     total_time = utime + stime;
@@ -140,7 +136,8 @@ double Command::GetCpuTime(ul utime, ul stime, ul starttime, int seconds)   //CP
     }
     return pcpu / 10.0;
 }
-string Command::GetStartTime(ulong uptime, ulong stime) //문자열 포맷 형식에 따라 프로세스 시작시간을 문자열로 반환하는 함수
+
+string Command::GetStartTime(ULL uptime, ULL stime) //문자열 포맷 형식에 따라 프로세스 시작시간을 문자열로 반환하는 함수
 {
     char result[16];
     unsigned int hertz = (unsigned int)sysconf(_SC_CLK_TCK);
@@ -163,36 +160,21 @@ string Command::GetStartTime(ulong uptime, ulong stime) //문자열 포맷 형�
     string str(result);
     return str;
 }
-string Command::GetUserName(char* filepath)
+
+string Command::GetUserName(char *filepath)
 {
     struct passwd *upasswd;
     struct stat lstat;
-    
-    if(stat(filepath, &lstat)){
+
+    if (stat(filepath, &lstat))
+    {
         upasswd = getpwuid(lstat.st_uid);
         string str(upasswd->pw_name);
         return str;
-    }else{
-        cerr <<filepath <<" is not valid." << endl;
-        return NULL;
     }
-    
-}
-
-void Command::PrintProc(void) const
-{
-    printf("%-10s %7s %7s %2s %16s %4s %9s %10s\n", "USER", "PID", "PPID", "ST", "NAME", "CPU", "VMEM", "START");
-    printf("========================================================================\n");
-    for (int i = 0; i < mProcInfo->size(); i++)
+    else
     {
-        printf("%-10s %7d %7d %2c %16s %2.1f %9d %10s\n",
-               (*mProcInfo)[i].username.c_str(),
-               (*mProcInfo)[i].pid,
-               (*mProcInfo)[i].ppid,
-               (*mProcInfo)[i].state,
-               (*mProcInfo)[i].comm.c_str(),
-               (*mProcInfo)[i].cpu,
-               (*mProcInfo)[i].vmem,
-               (*mProcInfo)[i].start.c_str());
+        cerr << filepath << " is not valid." << endl;
+        return NULL;
     }
 }
