@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "processinfo.h"
 
-ProcInfo getProcInfoByPID(vector<ProcInfo> procInfo, int PID)
+ProcInfo GetProcInfoByPID(vector<ProcInfo> procInfo, int PID)
 {
     ProcInfo selecProc;
 
