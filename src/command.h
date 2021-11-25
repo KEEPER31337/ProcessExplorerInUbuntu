@@ -25,7 +25,7 @@ public:
     void UpdateProcStat(void);
 
     // shell command functions
-    string Help(void);
+    string GetHelp(string cmdFunc);
     ProcInfo GetProcInfoByPID(int PID);
     void SendSignal(int PID, int signalNum);
     void RestartProc(int PID, string procPath);

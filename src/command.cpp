@@ -18,6 +18,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <signal.h>
 
 // for debug
 #include <cassert>
@@ -180,4 +181,113 @@ string Command::GetStartTime(ULL uptime, ULL stime) //문자열 포맷 형식에
 
     string str(result);
     return str;
+}
+
+string Command::GetUserName(char *filepath)
+{
+    struct passwd *upasswd;
+    struct stat lstat;
+
+    if (stat(filepath, &lstat))
+    {
+        upasswd = getpwuid(lstat.st_uid);
+        string str(upasswd->pw_name);
+        return str;
+    }
+    else
+    {
+        cerr << filepath << " is not valid." << endl;
+        return NULL;
+    }
+}
+
+void Command::SendSignal(int PID, int signalNum)
+{
+    kill(PID, signalNum);
+}
+
+ProcInfo Command::GetProcInfoByPID(int PID)
+{
+    ProcInfo selecProc;
+
+    vector<ProcInfo>::iterator ptr;
+    for(ptr = mProcInfo->begin(); ptr != mProcInfo->end(); ++ptr)
+    {
+        if(ptr->pid == PID) 
+        {
+            selecProc.pid = ptr->pid;
+            selecProc.ppid = ptr->ppid;
+            selecProc.state = ptr->state;
+            selecProc.comm = ptr->comm;
+            selecProc.start = ptr->start;
+        }
+        else if(ptr->ppid == PID) 
+        {
+            selecProc.pid = ptr->pid;
+            selecProc.ppid = ptr->ppid;
+            selecProc.state = ptr->state;
+            selecProc.comm = ptr->comm;
+            selecProc.start = ptr->start;
+        }
+    }
+    
+    return selecProc;
+}
+
+vector<ProcInfo> &SearchProc(vector<ProcInfo>& procInfo, std::string procAttr, std::string proc, Command &cmd)
+{
+    vector<ProcInfo> *resultProc;
+    Search *conv;
+    
+    resultProc = new vector<ProcInfo>;
+
+    vector<ProcInfo>::iterator ptr = procInfo.begin();
+    const std::string sattr = procAttr;
+    int nattr = 0;
+
+    if (sattr == "PID") nattr=conv->PID;
+    else if (sattr == "PPID") nattr=conv->PPID;
+    else if (sattr == "STATE") nattr=conv->STATE;
+    else if (sattr == "COMM") nattr=conv->COMM;
+    else if (sattr == "START") nattr=conv->START;
+    else nattr = conv->NONE;
+
+    switch(nattr){
+        case Search::eAttributeProc::PID :
+            const int pid = stoi(proc);
+            resultProc->push_back(cmd.GetProcInfoByPID(pid));
+            break;
+        case Search::eAttributeProc::PPID :
+            const int ppid = stoi(proc);
+            resultProc->push_back(cmd.GetProcInfoByPID(ppid));
+            break;
+        case Search::eAttributeProc::STATE :
+            for(ptr; ptr != procInfo.end(); ++ptr)
+            {
+                const char state = *proc.c_str();
+                const char procState = ptr->state;
+                if(Find::FindByChar(state, procState)) resultProc->push_back(*ptr);
+            }
+            break;
+        case Search::eAttributeProc::COMM :
+            for(ptr; ptr != procInfo.end(); ++ptr)
+            {
+                const std::string procName = proc;
+                const std::string procComm = ptr->comm;
+                if(Find::FindByStr(procName, procComm)) resultProc->push_back(*ptr);
+            }
+            break;
+        case Search::eAttributeProc::START :
+            for(ptr; ptr != procInfo.end(); ++ptr)
+            {
+                const std::string startTime = proc;
+                const std::string procTime = ptr->start;
+                if(Find::FindByStr(startTime, procTime)) resultProc->push_back(*ptr);
+            }
+            break;
+        default :
+            return *resultProc;
+    }
+
+    return *resultProc;
 }
