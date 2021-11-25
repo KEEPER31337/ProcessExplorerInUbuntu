@@ -5,7 +5,7 @@
 
 using namespace std;
 
-typedef unsigned long ul;
+typedef unsigned long long ULL;
 
 class Command
 {
@@ -33,8 +33,8 @@ private:
     vector<ProcInfo> *mProcInfo;
     Mode mMode;
     void SetSysInfo(void);
-    double GetCpuTime(ul utime, ul stime, ul starttime, int seconds);
-    string GetStartTime(ul uptime, ul stime);
+    double GetCpuTime(ULL utime, ULL stime, ULL starttime, int seconds);
+    string GetStartTime(ULL uptime, ULL stime);
     string GetUserName(char* path);
 
 };
