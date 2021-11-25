@@ -26,35 +26,38 @@
 #include "command.h"
 
 using namespace std;
+
+typedef unsigned long ul;
+typedef unsigned long long ull;
+
 Command::Command()
     : mMode(PRINTPROCINFO)
 {
     msysinfo = new SysInfo();
-    setSysInfo();
-    cout << msysinfo->uptime;
+    SetSysInfo();
     mProcInfo = new vector<ProcInfo>;
 }
 
-void Command::setMode(Mode m) 
+void Command::SetMode(Mode m) 
 { 
     mMode = m; 
 }
-Command::Mode Command::getMode(void) const 
+Command::Mode Command::GetMode(void) const 
 { 
     return mMode; 
 }
 
-int Command::getProcNum(void) const 
+int Command::GetProcNum(void) const 
 { 
     return mProcInfo->size(); 
 }
 
-vector<ProcInfo> &Command::getProcInfo(void) const 
+vector<ProcInfo> &Command::GetProcInfos(void) const 
 { 
     return *mProcInfo; 
 }
 
-void Command::setSysInfo(void) //sysinfo의 값 설정
+void Command::SetSysInfo(void) //sysinfo의 값 설정
 {
     FILE *fp;
     double stime;
@@ -70,7 +73,7 @@ void Command::setSysInfo(void) //sysinfo의 값 설정
     ifs.close();
     msysinfo->uptime = stime;
 }
-void Command::updateProcStat(void)
+void Command::UpdateProcStat(void)
 {
     DIR *dp;
     struct dirent *direntry;
@@ -87,7 +90,6 @@ void Command::updateProcStat(void)
         lstat(direntry->d_name, &statbuf);
 
         if (S_ISDIR(statbuf.st_mode) && isdigit(direntry->d_name[0])) {
-
             ifstream ifs(strcat(direntry->d_name, "/stat"));
             if ( !ifs.is_open() )
             {
@@ -105,21 +107,16 @@ void Command::updateProcStat(void)
                 ifs >> s;
                 t.push_back(s);
             }
-            /*username 가져옴
-            struct passwd *upasswd;
-            struct stat lstat;
-            stat(strcat(direntry->d_name, "/stat"), &lstat);
-            upasswd = getpwuid(lstat.st_uid);
-
-            ps.username = upasswd->pw_name;
-            */
-            ps.pid = stoi(t[0]);
-            ps.ppid = stoi(t[3]);
-            ps.state = t[2][0];
-            ps.comm = t[1];
-            ps.cpu = getCpuTime(stoi(t[13]), stoi(t[14]), stoi(t[21]), msysinfo->uptime);
-            ps.start = getStartTime(msysinfo->uptime, stoi(t[21]));
-            ps.vmem = stoi(t[22]);
+            
+            //ps.username = GetUserName(direntry->d_name);
+            ps.username = "test";
+            ps.pid      = stoi(t[0]);
+            ps.ppid     = stoi(t[3]);
+            ps.state    = t[2][0];
+            ps.comm     = t[1];
+            ps.cpu      = GetCpuTime(stoi(t[13]), stoi(t[14]), stoi(t[21]), msysinfo->uptime);
+            ps.start    = GetStartTime(msysinfo->uptime, stoi(t[21]));
+            ps.vmem     = stoi(t[22]);
 
             mProcInfo->push_back(ps);
 
@@ -130,9 +127,9 @@ void Command::updateProcStat(void)
         cerr << "dir close error" << endl;
     }
 }
-double Command::getCpuTime(ulong utime, ulong stime, ulong starttime, int seconds)
+double Command::GetCpuTime(ul utime, ul stime, ul starttime, int seconds)   //CPU 점유율
 {
-    ulong total_time;
+    ul total_time;
     int pcpu = 0;
 
     total_time = utime + stime;
@@ -143,11 +140,11 @@ double Command::getCpuTime(ulong utime, ulong stime, ulong starttime, int second
     }
     return pcpu / 10.0;
 }
-string Command::getStartTime(ulong uptime, ulong stime)
+string Command::GetStartTime(ulong uptime, ulong stime) //문자열 포맷 형식에 따라 프로세스 시작시간을 문자열로 반환하는 함수
 {
     char result[16];
     unsigned int hertz = (unsigned int)sysconf(_SC_CLK_TCK);
-    long startT = time(NULL) - (uptime - (stime / hertz));
+    time_t startT = time(NULL) - (uptime - (stime / hertz));
     struct tm *tmStart = localtime(&startT);
 
     if (time(NULL) - startT < 24 * 60 * 60)
@@ -166,8 +163,23 @@ string Command::getStartTime(ulong uptime, ulong stime)
     string str(result);
     return str;
 }
+string Command::GetUserName(char* filepath)
+{
+    struct passwd *upasswd;
+    struct stat lstat;
+    
+    if(stat(filepath, &lstat)){
+        upasswd = getpwuid(lstat.st_uid);
+        string str(upasswd->pw_name);
+        return str;
+    }else{
+        cerr <<filepath <<" is not valid." << endl;
+        return NULL;
+    }
+    
+}
 
-void Command::printProc(void) const
+void Command::PrintProc(void) const
 {
     printf("%-10s %7s %7s %2s %16s %4s %9s %10s\n", "USER", "PID", "PPID", "ST", "NAME", "CPU", "VMEM", "START");
     printf("========================================================================\n");
