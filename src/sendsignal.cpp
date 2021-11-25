@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void SendSignal(int pid, int signalnum){
+void SendSignal(int PID, int signalNum)
+{
 
-    char *kill_cmd;
+    char *killCMD;
     
-    sprintf(kill_cmd, "kill -%d %d", signalnum, pid); //PID客 signal可记阑 持篮 kill疙飞绢 积己
+    sprintf(killCMD, "kill -%d %d", signalNum, PID); //PID客 signal可记阑 持篮 kill疙飞绢 积己
 
-    system(kill_cmd);
+    system(killCMD);
 
 }
