@@ -178,3 +178,4 @@ string Command::GetUserName(char *filepath)
         return NULL;
     }
 }
+

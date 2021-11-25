@@ -4,7 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-void RestartProc(int PID, std::string pathProc){
+void RestartProc(int PID, std::string pathProc)
+{
 
     char *killCMD;
     char *runCMD;
