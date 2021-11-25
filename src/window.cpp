@@ -15,13 +15,13 @@ Window::Window(int endY, int endX, int begY, int begX)
 }
 
 
-void Window::printSize(void) const
+void Window::PrintSize(void) const
 {
     printf("beg  : %d, %d\n", getbegy(mWindow), getbegx(mWindow));
     printf("max  : %d, %d\n", getmaxy(mWindow), getmaxx(mWindow));
 }
 
-WINDOW *Window::getWindow(void) const
+WINDOW *Window::GetWindow(void) const
 {
     return mWindow;
 }
