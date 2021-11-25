@@ -2,6 +2,8 @@
 #include <ncurses.h>
 #include <vector>
 #include <cstring>
+#include <sstream>
+#include <iomanip>
 
 InfoWindow::InfoWindow(int endY, int endX, int begY, int begX)
     : Window(endY, endX, begY, begX)
@@ -14,16 +16,13 @@ void InfoWindow::PrintLine(std::string s)
 
 void InfoWindow::PrintTitle(void)
 {
-    char buf[1024];
-    char *s;
-    
-    sprintf(buf, "%8s%8s%10s", "PID", "PPID", "COMM");
+    stringstream ss;
 
-    s = (char *)malloc(strlen(buf)+1);
+    ss << setw(8) << "PID" 
+       << setw(8) << "PPID" 
+       << setw(10) << "COMM";
 
-    strcpy(s, buf);
-
-    PrintLine(s);
+    PrintLine(ss.str());
     touchwin(mWindow);
     wrefresh(mWindow);
 }
