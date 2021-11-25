@@ -2,6 +2,7 @@
 #include <string>
 #include <cstring>
 #include <cstdlib>
+#include <mutex>
 
 CmdWindow::CmdWindow(int endY, int endX, int begY, int begX)
     : Window(endY, endX, begY, begX)
@@ -42,18 +43,21 @@ int CmdWindow::printArgs(string input)
     int argCount = 0;
 
     while ( getNextArg(buf) != 0 ) {
-        if ( getcury(mWindow) == getmaxy(mWindow) - 1 ) {
+
+        if (getcury(mWindow) == getmaxy(mWindow) - 1)
             lineClear();
-        }
+        else
+            wmove(mWindow, getcury(mWindow) + 1, 0);
+
         mvwprintw(mWindow, getcury(mWindow), 0, "arg %d : %s", argCount, buf);
         argCount++;
+        
     }
-    if ( getcury(mWindow) == getmaxy(mWindow) - 1 ) {
+    
+    if (getcury(mWindow) == getmaxy(mWindow) - 1)
         lineClear();
-    }
-    else {
-        wmove(mWindow, getcury(mWindow)+1, 0);
-    }
+    else
+        wmove(mWindow, getcury(mWindow) + 1, 0);
     return argCount;
 }
 
@@ -64,14 +68,19 @@ void CmdWindow::lineClear(void)
     wmove(mWindow, getmaxy(mWindow) - 1, 0);
 }
 
-void CmdWindow::startShell(void)
+void CmdWindow::startShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
 {
     char c;
     std::string s;
     int idx = 0;
+    bool bPrevSpace = false;
+    
+    nodelay(mWindow, true);
+    
     mvwprintw(mWindow, 0, 0, "> ");
     while ( true )
     {
+        mutGetch.lock();
         if ( getcurx(mWindow) == getmaxx(mWindow) - 1 &&
              getcury(mWindow) == getmaxy(mWindow) - 1 )
         {
@@ -81,23 +90,30 @@ void CmdWindow::startShell(void)
         else {
             c = wgetch(mWindow);
         }
-
+        mutPrintScr.unlock();
         switch (c)
         {
         case ' ':
         case '\t':
-            s.push_back(' ');
+            if( !bPrevSpace ) {
+                s.push_back(' ');
+                bPrevSpace = true;
+            }
             break;
 
         case '\n':
-            wmove(mWindow, getcury(mWindow) + 1, 0);
             printArgs(s);
             wprintw(mWindow, "> ");
             s.clear();
+            bPrevSpace = false;
+            break;
+
+        case ERR:
             break;
 
         default:
             s.push_back(c);
+            bPrevSpace = false;
             break;
         }
     }
