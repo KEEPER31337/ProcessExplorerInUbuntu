@@ -43,19 +43,22 @@ int CmdWindow::printArgs(string input)
     int argCount = 0;
 
     while ( getNextArg(buf) != 0 ) {
-        if ( getcury(mWindow) == getmaxy(mWindow) - 1 ) {
+        if (getcury(mWindow) == getmaxy(mWindow) - 1)
+        {
             lineClear();
         }
+        else
+            wmove(mWindow, getcury(mWindow) + 1, 0);
         mvwprintw(mWindow, getcury(mWindow), 0, "arg %d : %s", argCount, buf);
-        wmove(mWindow, getcury(mWindow)+1, 0);
         argCount++;
+        
     }
-    if ( getcury(mWindow) == getmaxy(mWindow) - 1 ) {
+    if (getcury(mWindow) == getmaxy(mWindow) - 1)
+    {
         lineClear();
     }
-    else {
-        wmove(mWindow, getcury(mWindow)+1, 0);
-    }
+    else
+        wmove(mWindow, getcury(mWindow) + 1, 0);
     return argCount;
 }
 
@@ -96,7 +99,6 @@ void CmdWindow::startShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
             break;
 
         case '\n':
-            wmove(mWindow, getcury(mWindow) + 1, 0);
             printArgs(s);
             wprintw(mWindow, "> ");
             s.clear();
@@ -104,7 +106,7 @@ void CmdWindow::startShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
 
         case ERR:
             break;
-            
+
         default:
             s.push_back(c);
             break;
