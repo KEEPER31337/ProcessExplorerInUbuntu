@@ -7,12 +7,12 @@ InfoWindow::InfoWindow(int endY, int endX, int begY, int begX)
     : Window(endY, endX, begY, begX)
 {}
 
-void InfoWindow::printLine(std::string s)
+void InfoWindow::PrintLine(std::string s)
 {
     mvwaddnstr(mWindow, getcury(mWindow), 0, s.c_str(), getmaxx(mWindow));
 }
 
-void InfoWindow::printTitle(void)
+void InfoWindow::PrintTitle(void)
 {
     char buf[1024];
     char *s;
@@ -23,12 +23,12 @@ void InfoWindow::printTitle(void)
 
     strcpy(s, buf);
 
-    printLine(s);
+    PrintLine(s);
     touchwin(mWindow);
     wrefresh(mWindow);
 }
 
-void InfoWindow::printProcInfo(vector<ProcInfo> &procInfo) const
+void InfoWindow::PrintProcInfo(vector<ProcInfo> &procInfo) const
 {
     for (int i = 0; i < getmaxy(mWindow)-3; i++ )
     {
@@ -48,7 +48,7 @@ void InfoWindow::printProcInfo(vector<ProcInfo> &procInfo) const
     wrefresh(mWindow);
 }
 
-void InfoWindow::windowClear(void) const
+void InfoWindow::WindowClear(void) const
 {
     for (int i = 0; i < getmaxy(mWindow) - 3; i++)
     {

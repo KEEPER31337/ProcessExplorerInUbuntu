@@ -13,7 +13,7 @@ char buf[1024];
 std::mutex *mutPrintScr;
 std::mutex *mutGetch;
 
-void initWindow(void)
+void InitWindow(void)
 {
     initscr();
     start_color();
@@ -25,28 +25,28 @@ void initWindow(void)
     cmdWindow = new CmdWindow(9, getmaxx(stdscr), getmaxy(stdscr) - 9, 0);
     cmd = new Command();
 
-    infoWindow->printTitle();
+    infoWindow->PrintTitle();
     for(int i=0; i<getmaxx(stdscr); i++)
         mvwaddch(stdscr, getmaxy(stdscr)-10, i, '-');
     touchwin(stdscr);
     wrefresh(stdscr); 
 }
 
-void infoWindowThreadFunc(void)
+void InfoWindowThreadFunc(void)
 {
     while (true)
     {
-        switch(cmd->getMode())
+        switch(cmd->GetMode())
         {
         case Command::Mode::PRINTPROCINFO:
-            cmd->updateProcStat();
+            cmd->UpdateProcStat();
             mutPrintScr->lock();
-            infoWindow->printProcInfo(cmd->getProcInfo());
+            infoWindow->PrintProcInfo(cmd->GetProcInfo());
             mutGetch->unlock();
             break;
         case Command::Mode::CLEAR:
             mutPrintScr->lock();
-            infoWindow->windowClear();
+            infoWindow->WindowClear();
             mutGetch->unlock();
             break;
         default:
@@ -55,22 +55,22 @@ void infoWindowThreadFunc(void)
     }
 }
 
-void cmdWindowThreadFunc(void)
+void CmdWindowThreadFunc(void)
 {
-    cmdWindow->startShell(*mutPrintScr, *mutGetch);
+    cmdWindow->StartShell(*mutPrintScr, *mutGetch);
 }
 
-void endWindow(void)
+void EndWindow(void)
 {
     endwin();
-    infoWindow->printSize();
-    cmdWindow->printSize();
+    infoWindow->PrintSize();
+    cmdWindow->PrintSize();
 }
 
-void working(void)
+void Working(void)
 {
-    std::thread infoWinThread(infoWindowThreadFunc);
-    std::thread cmdWinThread(cmdWindowThreadFunc);
+    std::thread infoWinThread(InfoWindowThreadFunc);
+    std::thread cmdWinThread(CmdWindowThreadFunc);
 
     infoWinThread.join();
     cmdWinThread.join();
@@ -78,7 +78,7 @@ void working(void)
 
 int main(void)
 {
-    initWindow();
-    working();
-    endWindow();
+    InitWindow();
+    Working();
+    EndWindow();
 }

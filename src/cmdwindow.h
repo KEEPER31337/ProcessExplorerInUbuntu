@@ -6,14 +6,14 @@ class CmdWindow : public Window
 {
 public:
     CmdWindow(int endY, int endX, int begY, int begX);
-    void startShell(std::mutex &mutPrintScr, std::mutex &mutGetch);
+    void StartShell(std::mutex &mutPrintScr, std::mutex &mutGetch);
     
 private:
     
-    void initArgList(string args);
-    int getNextArg(char *arg);
-    int printArgs(std::string input);
-    void lineClear(void);
+    void InitArgList(string args);
+    int GetNextArg(char *arg);
+    int PrintArgs(std::string input);
+    void LineClear(void);
 
     struct argList
     {
@@ -22,5 +22,5 @@ private:
         int curArgc;
     } arglist;
 
-    Command cmd;
+    Command mcmd;
 };

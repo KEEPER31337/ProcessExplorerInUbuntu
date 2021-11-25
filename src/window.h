@@ -5,8 +5,8 @@ class Window
 {
 public:
     Window(int endY, int endX, int begY, int begX);
-    void printSize(void) const;
-    WINDOW *getWindow(void) const;
+    void PrintSize(void) const;
+    WINDOW *GetWindow(void) const;
     /*
         no more need
     void drawBorder(void) const;
