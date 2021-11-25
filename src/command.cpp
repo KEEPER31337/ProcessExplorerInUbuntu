@@ -179,3 +179,35 @@ string Command::GetUserName(char *filepath)
     }
 }
 
+string Command::GetHelp(string cmdFunc)
+{
+    switch(cmdFunc)
+    {
+        case 'info':
+            return "info [PID]: this command display the information of processs' detail informain";
+            break;
+        case 'path':
+            return "path [PID] : this command display the path of each process";
+            break;
+        case 'viruscheck':
+            return "viruscheck [PID] : this command check a status which process is infection";
+            break;
+        case 'restart':
+            return "restart [PID] : this command restarts the process";
+            break;
+        case 'sendsignal':
+            return "sendsignal [PID] [SGINAL_NUM] : this command send a signal";
+            break;
+        case 'search':
+            return "search [PID] [KEYWORD] : this command search the process using keyword";
+            break;
+        default:
+            return "info [PID]: this command display the information of processs' detail informain\n\
+            path [PID] : this command display the path of each process\n\
+            viruscheck [PID] : this command check a status which process is infection\n\
+            restart [PID] : this command restarts the process\n\
+            sendsignal [PID] [SGINAL_NUM] : this command send a signal\n\
+            search [PID] [KEYWORD] : this command search the process using keyword";
+            break;
+    }
+}
