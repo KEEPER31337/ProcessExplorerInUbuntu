@@ -4,6 +4,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <mutex>
+#include "command.h"
 
 CmdWindow::CmdWindow(int endY, int endX, int begY, int begX)
     : Window(endY, endX, begY, begX)
@@ -88,8 +89,17 @@ void CmdWindow::executeCommand(string &args)
     for ( it=mCmdEntry->begin(); it != mCmdEntry->end(); it++ ) {
         if( cmd.compare(it->cmd) == 0 ) {
 
-            if( cmd.compare("help") == 0 )
+             if( cmd.compare("help") == 0 )
                 executeHelp();
+            else if( cmd.compare("path") == 0 )
+                executePath();
+            else if( cmd.compare("viruscheck") == 0 )
+                executeVirusCheck();
+            else if( cmd.compare("kill") == 0 )
+                executeKill();
+            else if( cmd.compare("search") == 0 )
+                executeSearch();
+
             break;
 
         }
@@ -98,8 +108,33 @@ void CmdWindow::executeCommand(string &args)
         printStr("not found command");
 }
 
-/*
 void CmdWindow::executeInfo(void)
+{
+    int pid;
+    char buf[1024];
+
+    if ( getNextArg(buf) == 0 ) 
+    {
+        printStr("wrong input");
+        return;
+    }
+    pid = stoi(buf);
+    ProcInfo information = mCmd->GetProcInfoByPID(pid);
+    if(information.pid == -1)
+    {
+        printStr("not found pid");
+    } else {
+        string a = "";
+        a = a + "PID : " + to_string(information.pid) + 
+        ", PPID : " + to_string(information.ppid) + 
+        ", ST : " + information.state + 
+        ", COMMAND :  " + information.comm +
+        ", START : " + information.start;
+        printStr(a);
+    }
+}
+
+void CmdWindow::executePath(void)
 {
     int pid;
     char buf[1024];
@@ -110,13 +145,6 @@ void CmdWindow::executeInfo(void)
     }
     pid = stoi(buf);
 
-    mCmd->
-
-}
-
-void CmdWindow::executePath(void)
-{
- 
 }
 
 void CmdWindow::executeVirusCheck(void)
@@ -124,16 +152,44 @@ void CmdWindow::executeVirusCheck(void)
     
 }
 
+
 void CmdWindow::executeKill(void)
 {
-    
+    int pid, sigNum;
+    char buf[1024];
+    if ( getNextArg(buf) == 0 ) {
+        printStr("wrong input");
+        return;
+    }
+    pid = stoi(buf);
+
+    if ( getNextArg(buf) == 0 ) {
+        printStr("wrong input");
+        return;
+    }
+    sigNum = stoi(buf);
+
+    mCmd->SendSignal(pid, sigNum);
 }
 
 void CmdWindow::executeSearch(void)
 {
-    
+    char buf[1024];
+    string attr;
+    string keyword;
+    if ( getNextArg(buf) == 0 ) {
+        printStr("!need attribute!");
+        return;
+    }
+    attr = buf;
+    if ( getNextArg(buf) == 0 ) {
+        printStr("!need keyword!");
+        return;
+    }
+    keyword = buf;
+    mCmd->SearchProc(mCmd->GetProcInfos(),attr, keyword, *mCmd);
 }
-*/
+
 
 void CmdWindow::executeHelp(void)
 {

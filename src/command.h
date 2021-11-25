@@ -27,6 +27,7 @@ public:
     // shell command functions
     string GetHelp(string cmdFunc);
     ProcInfo GetProcInfoByPID(int PID);
+    ProcInfo GetProcInfoByPPID(int PPID);
     void SendSignal(int PID, int signalNum);
     void RestartProc(int PID, string procPath);
     vector<ProcInfo> &SearchProc(vector<ProcInfo>& procInfo, std::string procAttr, std::string proc, Command &cmd);
