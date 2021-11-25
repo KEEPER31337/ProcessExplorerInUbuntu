@@ -1,26 +1,25 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <stdio.h>
 #include "processinfo.h"
 
-using namespace std;
+ProcInfo getProcInfoByPID(vector<ProcInfo> procInfo, int pid)
+{
+    ProcInfo selecProc;
 
-string specificinfo(int pid){
-    char *cmd;
-
-    sprintf(cmd, "cat /proc/%d/stat", pid);
-
-    FILE *stream = popen(cmd, "r");
-
-    ostringstream output;
-
-    while( !feof(stream) && !ferror(stream)){
-        char *buf;
-        int bytesRead = fread(buf, 1, 128, stream);
-        output.write(buf, bytesRead);
+    vector<ProcInfo>::iterator ptr;
+    for(ptr = procInfo.begin(); ptr != procInfo.end(); ++ptr)
+    {
+        if(ptr->pid == pid) 
+        {
+            selecProc.pid = ptr->pid;
+            selecProc.ppid = ptr->ppid;
+            selecProc.state = ptr->state;
+            selecProc.comm = ptr->comm;
+            selecProc.start = ptr->start;
+        }
     }
     
-    string result = output.str();
-    
-    return result;
+    return selecProc;
 }

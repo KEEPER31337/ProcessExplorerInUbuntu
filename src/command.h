@@ -14,6 +14,8 @@ public:
     void printProc(void) const;
     void setMode(Mode m);
     Mode getMode(void) const;
+    string Help(void);
+    ProcInfo GetProcInfoByPID(vector<ProcInfo> procInfo,int PID);
 
 private:
     vector<ProcInfo> *mProcInfo;
