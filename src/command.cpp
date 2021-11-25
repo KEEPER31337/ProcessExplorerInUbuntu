@@ -68,6 +68,8 @@ void Command::UpdateProcStat(void)
         lstat(direntry->d_name, &statbuf);
 
         if (S_ISDIR(statbuf.st_mode) && isdigit(direntry->d_name[0])) {
+            char pDir[20];    //현재 프로세스 파일명(pid)을 저장해둘 변수
+            strcpy(pDir,direntry->d_name);
             ifstream ifs(strcat(direntry->d_name, "/stat"));
             if ( !ifs.is_open() )
             {
@@ -85,9 +87,28 @@ void Command::UpdateProcStat(void)
                 ifs >> s;
                 t.push_back(s);
             }
+
+            struct stat statfile;   // /[pid]/stat 파일의 정보를 담을 변수
+            struct passwd *upasswd;
+            stat(direntry->d_name,&statfile);   //statfile 변수에 값 할당
+            upasswd = getpwuid(statfile.st_uid);
+            ps.username = upasswd->pw_name;
+
+            ifstream ifss(strcat(pDir,"/status"));
+            if(!ifss.is_open()){    // status file exception
+                continue;
+            }
+            string line;
+            while(ifss>>s){
+                getline(ifss,line);
+                if(s.find("Name")!=string::npos){
+                    ps.name=line;       //process name setting
+                }
+                if(s.find("Thread")!=string::npos){
+                    ps.nlwp=stoi(line); //# of thread setting
+                }
+            }
             
-            //ps.username = GetUserName(direntry->d_name);
-            ps.username = "test";
             ps.pid      = stoi(t[0]);
             ps.ppid     = stoi(t[3]);
             ps.state    = t[2][0];
@@ -160,22 +181,3 @@ string Command::GetStartTime(ULL uptime, ULL stime) //문자열 포맷 형식에
     string str(result);
     return str;
 }
-
-string Command::GetUserName(char *filepath)
-{
-    struct passwd *upasswd;
-    struct stat lstat;
-
-    if (stat(filepath, &lstat))
-    {
-        upasswd = getpwuid(lstat.st_uid);
-        string str(upasswd->pw_name);
-        return str;
-    }
-    else
-    {
-        cerr << filepath << " is not valid." << endl;
-        return NULL;
-    }
-}
-

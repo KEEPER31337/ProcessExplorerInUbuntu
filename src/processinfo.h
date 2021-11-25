@@ -14,5 +14,6 @@ struct ProcInfo {
     char    state;      // state
     string  username;   // 프로세스 사용 유저명
     string  start;      // 프로세스 시작 시간
-                        // # of threads
+    int     nlwp;       // # of threads
+    string  name;       // process name
 };
