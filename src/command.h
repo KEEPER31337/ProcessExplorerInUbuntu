@@ -16,25 +16,27 @@ public:
         CLEAR
     };
     Command();
-    int GetProcNum(void) const; //프로세스 총 개수
-    vector<ProcInfo> &GetProcInfos(void) const;
-    void UpdateProcStat(void);
+    // setting print mode
     void SetMode(Mode m);
     Mode GetMode(void) const;
+
+    vector<ProcInfo> &GetProcInfos(void) const;
+    void UpdateProcStat(void);
+
+    // shell command functions
     string Help(void);
     ProcInfo GetProcInfoByPID(vector<ProcInfo> procInfo,int PID);
     void SendSignal(int PID, int signalNum);
     void RestartProc(int PID, string procPath);
-    
-    void PrintProc(void) const; //출력 테스트 목적
 
 private:
-    SysInfo *msysinfo;
-    vector<ProcInfo> *mProcInfo;
-    Mode mMode;
+    // for update proc status
     void SetSysInfo(void);
     double GetCpuTime(ULL utime, ULL stime, ULL starttime, int seconds);
     string GetStartTime(ULL uptime, ULL stime);
     string GetUserName(char* path);
 
+    SysInfo *mSysInfo;
+    vector<ProcInfo> *mProcInfo;
+    Mode mMode;
 };
