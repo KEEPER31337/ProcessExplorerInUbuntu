@@ -19,7 +19,7 @@ const std::string VIRUSTOTAL_URL = "https://www.virustotal.com/vtapi/v2/";
 const std::string VIRUSTOTAL_SCAN_URL = "https://www.virustotal.com/vtapi/v2/file/scan";
 const std::string APIKEY = "717e5ae38a274a05ecebbdb08291a3350fdbde97b29b1ff03666c4d95d543a3a";
 
-fileData &getFileData(std::string fileName)
+fileData &getFileData(std::string &fileName)
 {
     std::ifstream ifs(fileName, std::ifstream::binary);
     fileData *filedata = new fileData();
@@ -66,7 +66,7 @@ static size_t writeMemory(char *data, size_t size, size_t nmemb, std::string *s)
     return size * nmemb;
 }
 
-std::string &makeScanPostFields(std::string fileName)
+std::string &makeScanPostFields(std::string &fileName)
 {
     fileData filedata = getFileData(fileName);
 
@@ -132,7 +132,7 @@ std::string &requestReport(std::string resource)
     return *s;
 }
 
-std::string &requestScan(void)
+std::string &requestScan(std::string &fileName)
 {
     CURL *curl;
     CURLcode code;
@@ -149,7 +149,6 @@ std::string &requestScan(void)
     code = curl_easy_setopt(curl, CURLOPT_URL, VIRUSTOTAL_SCAN_URL.c_str());
     if ( code != CURLE_OK )
         std::cerr << "URL Error : " << curl_easy_strerror(code) << std::endl;
-
     struct curl_slist *headers = NULL;
 
     headers = curl_slist_append(headers, "Accept: application/json");
@@ -159,7 +158,7 @@ std::string &requestScan(void)
     if ( code != CURLE_OK )
         std::cerr << "HttpHeader Error : " << curl_easy_strerror(code) << std::endl;
 
-    code = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, makeScanPostFields("./hashtest").c_str());
+    code = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, makeScanPostFields(fileName).c_str());
     if ( code != CURLE_OK )
         std::cerr << "PostFields Error : " << curl_easy_strerror(code) << std::endl;
 
@@ -185,7 +184,7 @@ Json::Value &parsingJson(std::string &data)
     Json::Value *rootr = new Json::Value();
     Json::Reader reader;
 
-    if ( reader.parse(data, *rootr) ) {
+    if ( !reader.parse(data, *rootr) ) {
         std::cerr << "json parse error" << std::endl;
     }
 
@@ -194,21 +193,39 @@ Json::Value &parsingJson(std::string &data)
 
 
 
-int main(void)
+int main(int argc, char *argv[])
 {
     std::string s;
     Json::Value scanResult;
     Json::Value reportResult;
+    Json::Value scanList;
+    std::string fileName;
+    int detectedCnt = 0;
+    int totalCnt    = 0;
 
-    s = requestScan();
-    std::cout << s << std::endl;
+    if (argc == 1) {
+        std::cerr << "please Input FileName." << std::endl;
+        exit(1);
+    } else if (argc != 2) {
+        std::cerr << "please Input 1 argument." << std::endl;
+        exit(1);
+    } else {
+        fileName = argv[1];
+        s = requestScan(fileName);
+    }
+    // std::cout << s << std::endl;
 
     scanResult = parsingJson(s);
-    std::cout << "resource : " << scanResult["resource"].asCString() << std::endl;
 
     s = requestReport(scanResult["resource"].asCString());
-    std::cout << s << std::endl;
-
-    reportResult = parsingJson(s);
+    scanList = parsingJson(s)["scans"];
+    totalCnt = scanList.size();
+    for (Json::ValueIterator it = scanList.begin(); it != scanList.end(); it++) {
+        if ((*it)["detected"].asString() != "false") {
+            detectedCnt++;
+        }
+    }
+    std::cout << detectedCnt << '/' << totalCnt << '\n';
+    // reportResult = parsingJson(s);
     return 0;
 }
