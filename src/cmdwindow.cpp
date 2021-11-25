@@ -1,5 +1,6 @@
 #include "cmdwindow.h"
 #include <string>
+#include <sstream>
 #include <cstring>
 #include <cstdlib>
 #include <mutex>
@@ -61,28 +62,43 @@ void CmdWindow::StartShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
     }
 }
 
+// require string new line (x == 0)
+void CmdWindow::printStr(string s)
+{
+    int curIdx = 0;
+
+    while ( curIdx < s.size() ) {
+
+        mvwaddnstr(mWindow, getcury(mWindow), 0, s.c_str()+curIdx, getmaxx(mWindow));
+
+        curIdx += getmaxx(mWindow);
+        if (getcury(mWindow) == getmaxy(mWindow) - 1)
+            lineClear();
+        else
+            wmove(mWindow, getcury(mWindow) + 1, 0);
+    }
+}
+
 int CmdWindow::printArgs(string input)
 {
     initArgList(input.c_str());
     char buf[1024];
     int argCount = 0;
 
-    while (getNextArg(buf) != 0)
-    {
-
-        if (getcury(mWindow) == getmaxy(mWindow) - 1)
-            lineClear();
-        else
-            wmove(mWindow, getcury(mWindow) + 1, 0);
-
-        mvwprintw(mWindow, getcury(mWindow), 0, "arg %d : %s", argCount, buf);
-        argCount++;
-    }
-
     if (getcury(mWindow) == getmaxy(mWindow) - 1)
         lineClear();
     else
         wmove(mWindow, getcury(mWindow) + 1, 0);
+
+    while (getNextArg(buf) != 0)
+    {
+        stringstream ss;
+        ss << "arg " << argCount
+           << ": " << buf; 
+        printStr(ss.str());
+        argCount++;
+    }
+
     return argCount;
 }
 

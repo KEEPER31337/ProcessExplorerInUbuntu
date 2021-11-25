@@ -9,10 +9,11 @@ public:
     void StartShell(std::mutex &mutPrintScr, std::mutex &mutGetch);
     
 private:
-    int printArgs(std::string input);
-    void lineClear(void);
-    void initArgList(string args);
-    int getNextArg(char *arg);
+    void printStr    (string s);
+    int  printArgs   (std::string input);
+    void lineClear   (void);
+    void initArgList (string args);
+    int  getNextArg  (char *arg);
     
     struct argList {
         std::string argBuffer;
