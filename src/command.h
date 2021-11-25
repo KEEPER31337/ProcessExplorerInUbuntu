@@ -28,8 +28,6 @@ public:
     ProcInfo GetProcInfoByPID(vector<ProcInfo> procInfo,int PID);
     void SendSignal(int PID, int signalNum);
     void RestartProc(int PID, string procPath);
-    
-    void PrintProc(void) const; //출력 테스트 목적
 
 private:
     // for update proc status

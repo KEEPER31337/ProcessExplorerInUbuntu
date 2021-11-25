@@ -178,21 +178,3 @@ string Command::GetUserName(char *filepath)
         return NULL;
     }
 }
-
-void Command::PrintProc(void) const
-{
-    printf("%-10s %7s %7s %2s %16s %4s %9s %10s\n", "USER", "PID", "PPID", "ST", "NAME", "CPU", "VMEM", "START");
-    printf("========================================================================\n");
-    for (int i = 0; i < mProcInfo->size(); i++)
-    {
-        printf("%-10s %7d %7d %2c %16s %2.1f %9d %10s\n",
-               (*mProcInfo)[i].username.c_str(),
-               (*mProcInfo)[i].pid,
-               (*mProcInfo)[i].ppid,
-               (*mProcInfo)[i].state,
-               (*mProcInfo)[i].comm.c_str(),
-               (*mProcInfo)[i].cpu,
-               (*mProcInfo)[i].vmem,
-               (*mProcInfo)[i].start.c_str());
-    }
-}
