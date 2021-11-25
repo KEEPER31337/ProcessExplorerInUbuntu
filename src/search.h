@@ -3,11 +3,10 @@
 #include <string>
 #include <iostream>
 
-class Filter{
+class Search{
 public:
     enum eAttributeProc { NONE, PID, PPID, STATE, COMM, START };
-    eAttributeProc getAttribute(void) const;
-    eAttributeProc convert(const std::string& str);
+    eAttributeProc getAttribute(const std::string& str);
 
 private:
     eAttributeProc mAttributeProc;

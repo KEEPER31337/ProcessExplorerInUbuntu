@@ -18,6 +18,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <signal.h>
 
 // for debug
 #include <cassert>
@@ -179,52 +180,9 @@ string Command::GetUserName(char *filepath)
     }
 }
 
-string Command::GetHelp(string cmdFunc)
-{
-    switch(cmdFunc)
-    {
-        case 'info':
-            return "info [PID]: this command display the information of processs' detail informain";
-            break;
-        case 'path':
-            return "path [PID] : this command display the path of each process";
-            break;
-        case 'viruscheck':
-            return "viruscheck [PID] : this command check a status which process is infection";
-            break;
-        case 'restart':
-            return "restart [PID] : this command restarts the process";
-            break;
-        case 'sendsignal':
-            return "sendsignal [PID] [SGINAL_NUM] : this command send a signal";
-            break;
-        case 'search':
-            return "search [PID] [KEYWORD] : this command search the process using keyword";
-            break;
-        default:
-            return "info [PID]: this command display the information of processs' detail informain\n\
-            path [PID] : this command display the path of each process\n\
-            viruscheck [PID] : this command check a status which process is infection\n\
-            restart [PID] : this command restarts the process\n\
-            sendsignal [PID] [SGINAL_NUM] : this command send a signal\n\
-            search [PID] [KEYWORD] : this command search the process using keyword";
-            break;
-    }
-}
-
 void Command::SendSignal(int PID, int signalNum)
 {
     kill(PID, signalNum);
-}
-
-void Command::RestartProc(int PID, std::string pathProc)
-{
-    char *runCMD;
-    
-    kill(PID, 9);
-
-    strcpy(runCMD, pathProc.c_str());
-    system(runCMD);
 }
 
 ProcInfo Command::GetProcInfoByPID(int PID)
@@ -253,4 +211,62 @@ ProcInfo Command::GetProcInfoByPID(int PID)
     }
     
     return selecProc;
+}
+
+vector<ProcInfo> &SearchProc(vector<ProcInfo>& procInfo, std::string procAttr, std::string proc, Command &cmd)
+{
+    vector<ProcInfo> *resultProc;
+    Search *conv;
+    
+    resultProc = new vector<ProcInfo>;
+
+    vector<ProcInfo>::iterator ptr = procInfo.begin();
+    const std::string sattr = procAttr;
+    int nattr = 0;
+
+    if (sattr == "PID") nattr=conv->PID;
+    else if (sattr == "PPID") nattr=conv->PPID;
+    else if (sattr == "STATE") nattr=conv->STATE;
+    else if (sattr == "COMM") nattr=conv->COMM;
+    else if (sattr == "START") nattr=conv->START;
+    else nattr = conv->NONE;
+
+    switch(nattr){
+        case Search::eAttributeProc::PID :
+            const int pid = stoi(proc);
+            resultProc->push_back(cmd.GetProcInfoByPID(pid));
+            break;
+        case Search::eAttributeProc::PPID :
+            const int ppid = stoi(proc);
+            resultProc->push_back(cmd.GetProcInfoByPID(ppid));
+            break;
+        case Search::eAttributeProc::STATE :
+            for(ptr; ptr != procInfo.end(); ++ptr)
+            {
+                const char state = *proc.c_str();
+                const char procState = ptr->state;
+                if(Find::FindByChar(state, procState)) resultProc->push_back(*ptr);
+            }
+            break;
+        case Search::eAttributeProc::COMM :
+            for(ptr; ptr != procInfo.end(); ++ptr)
+            {
+                const std::string procName = proc;
+                const std::string procComm = ptr->comm;
+                if(Find::FindByStr(procName, procComm)) resultProc->push_back(*ptr);
+            }
+            break;
+        case Search::eAttributeProc::START :
+            for(ptr; ptr != procInfo.end(); ++ptr)
+            {
+                const std::string startTime = proc;
+                const std::string procTime = ptr->start;
+                if(Find::FindByStr(startTime, procTime)) resultProc->push_back(*ptr);
+            }
+            break;
+        default :
+            return *resultProc;
+    }
+
+    return *resultProc;
 }
