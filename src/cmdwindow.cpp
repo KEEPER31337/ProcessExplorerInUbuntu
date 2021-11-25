@@ -9,14 +9,14 @@ CmdWindow::CmdWindow(int endY, int endX, int begY, int begX)
 {
 }
 
-void CmdWindow::initArgList(std::string args)
+void CmdWindow::InitArgList(std::string args)
 {
     arglist.argBuffer = args;
     arglist.curArgIdx = 0;
     arglist.curArgc = 0;
 }
 
-int CmdWindow::getNextArg(char *arg)
+int CmdWindow::GetNextArg(char *arg)
 {
     int argLen, i;
     if (arglist.argBuffer.size() <= arglist.curArgIdx)
@@ -36,16 +36,16 @@ int CmdWindow::getNextArg(char *arg)
     return argLen;
 }
 
-int CmdWindow::printArgs(string input)
+int CmdWindow::PrintArgs(string input)
 {
-    initArgList(input.c_str());
+    InitArgList(input.c_str());
     char buf[1024];
     int argCount = 0;
 
-    while ( getNextArg(buf) != 0 ) {
+    while ( GetNextArg(buf) != 0 ) {
 
         if (getcury(mWindow) == getmaxy(mWindow) - 1)
-            lineClear();
+            LineClear();
         else
             wmove(mWindow, getcury(mWindow) + 1, 0);
 
@@ -55,20 +55,20 @@ int CmdWindow::printArgs(string input)
     }
     
     if (getcury(mWindow) == getmaxy(mWindow) - 1)
-        lineClear();
+        LineClear();
     else
         wmove(mWindow, getcury(mWindow) + 1, 0);
     return argCount;
 }
 
-void CmdWindow::lineClear(void)
+void CmdWindow::LineClear(void)
 {
     wmove(mWindow, 0, 0);
     wdeleteln(mWindow);
     wmove(mWindow, getmaxy(mWindow) - 1, 0);
 }
 
-void CmdWindow::startShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
+void CmdWindow::StartShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
 {
     char c;
     std::string s;
@@ -85,7 +85,7 @@ void CmdWindow::startShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
              getcury(mWindow) == getmaxy(mWindow) - 1 )
         {
             c = wgetch(mWindow);
-            lineClear();
+            LineClear();
         }
         else {
             c = wgetch(mWindow);
@@ -102,7 +102,7 @@ void CmdWindow::startShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
             break;
 
         case '\n':
-            printArgs(s);
+            PrintArgs(s);
             wprintw(mWindow, "> ");
             s.clear();
             bPrevSpace = false;

@@ -6,8 +6,8 @@ class InfoWindow : public Window
 {
 public:
     InfoWindow(int endY, int endX, int begY, int begX);
-    void printTitle(void);
-    void printProcInfo(vector<ProcInfo> &procInfo) const;
-    void windowClear(void) const;
-    void printLine(string s);
+    void PrintTitle(void);
+    void PrintProcInfo(vector<ProcInfo> &procInfo) const;
+    void WindowClear(void) const;
+    void PrintLine(string s);
 };
