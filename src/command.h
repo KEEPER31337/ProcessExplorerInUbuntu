@@ -16,7 +16,6 @@ public:
         CLEAR
     };
     Command();
-    int GetProcNum(void) const; //프로세스 총 개수
     vector<ProcInfo> &GetProcInfos(void) const;
     void UpdateProcStat(void);
     void SetMode(Mode m);

@@ -46,11 +46,6 @@ Command::Mode Command::GetMode(void) const
     return mMode; 
 }
 
-int Command::GetProcNum(void) const 
-{ 
-    return mProcInfo->size(); 
-}
-
 vector<ProcInfo> &Command::GetProcInfos(void) const 
 { 
     return *mProcInfo; 
