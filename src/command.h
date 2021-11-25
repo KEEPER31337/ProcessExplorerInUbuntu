@@ -17,7 +17,7 @@ public:
         CLEAR
     };
     Command();
-    int GetProcNum(void) const; //�봽濡쒖꽭�뒪 珥� 媛쒖닔
+    int GetProcNum(void) const; //프로세스 총 개수
     vector<ProcInfo> &GetProcInfos(void) const;
     void UpdateProcStat(void);
     void SetMode(Mode m);
@@ -27,7 +27,7 @@ public:
     void SendSignal(int PID, int signalNum);
     void RestartProc(int PID, string procPath);
     vector<ProcInfo> &SearchProc(vector<ProcInfo>& procInfo, std::string procAttr, std::string proc, Command &cmd);
-    void PrintProc(void) const; //異쒕젰 �뀒�뒪�듃 紐⑹쟻
+    void PrintProc(void) const; //출력 테스트 목적
 
 private:
     SysInfo *msysinfo;
