@@ -43,20 +43,19 @@ int CmdWindow::printArgs(string input)
     int argCount = 0;
 
     while ( getNextArg(buf) != 0 ) {
+
         if (getcury(mWindow) == getmaxy(mWindow) - 1)
-        {
             lineClear();
-        }
         else
             wmove(mWindow, getcury(mWindow) + 1, 0);
+
         mvwprintw(mWindow, getcury(mWindow), 0, "arg %d : %s", argCount, buf);
         argCount++;
         
     }
+    
     if (getcury(mWindow) == getmaxy(mWindow) - 1)
-    {
         lineClear();
-    }
     else
         wmove(mWindow, getcury(mWindow) + 1, 0);
     return argCount;
@@ -74,6 +73,7 @@ void CmdWindow::startShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
     char c;
     std::string s;
     int idx = 0;
+    bool bPrevSpace = false;
     
     nodelay(mWindow, true);
     
@@ -95,13 +95,17 @@ void CmdWindow::startShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
         {
         case ' ':
         case '\t':
-            s.push_back(' ');
+            if( !bPrevSpace ) {
+                s.push_back(' ');
+                bPrevSpace = true;
+            }
             break;
 
         case '\n':
             printArgs(s);
             wprintw(mWindow, "> ");
             s.clear();
+            bPrevSpace = false;
             break;
 
         case ERR:
@@ -109,6 +113,7 @@ void CmdWindow::startShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
 
         default:
             s.push_back(c);
+            bPrevSpace = false;
             break;
         }
     }
