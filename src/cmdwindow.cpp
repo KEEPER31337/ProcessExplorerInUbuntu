@@ -9,65 +9,6 @@ CmdWindow::CmdWindow(int endY, int endX, int begY, int begX)
 {
 }
 
-void CmdWindow::InitArgList(std::string args)
-{
-    arglist.argBuffer = args;
-    arglist.curArgIdx = 0;
-    arglist.curArgc = 0;
-}
-
-int CmdWindow::GetNextArg(char *arg)
-{
-    int argLen, i;
-    if (arglist.argBuffer.size() <= arglist.curArgIdx)
-        return 0;
-
-    for (i = arglist.curArgIdx; i < arglist.argBuffer.size(); i++)
-    {
-        if (arglist.argBuffer[i] == ' ')
-        {
-            break;
-        }
-    }
-    argLen = i - arglist.curArgIdx;
-    memcpy(arg, arglist.argBuffer.c_str() + arglist.curArgIdx, argLen);
-    arg[argLen] = '\0';
-    arglist.curArgIdx += argLen + 1;
-    return argLen;
-}
-
-int CmdWindow::PrintArgs(string input)
-{
-    InitArgList(input.c_str());
-    char buf[1024];
-    int argCount = 0;
-
-    while ( GetNextArg(buf) != 0 ) {
-
-        if (getcury(mWindow) == getmaxy(mWindow) - 1)
-            LineClear();
-        else
-            wmove(mWindow, getcury(mWindow) + 1, 0);
-
-        mvwprintw(mWindow, getcury(mWindow), 0, "arg %d : %s", argCount, buf);
-        argCount++;
-        
-    }
-    
-    if (getcury(mWindow) == getmaxy(mWindow) - 1)
-        LineClear();
-    else
-        wmove(mWindow, getcury(mWindow) + 1, 0);
-    return argCount;
-}
-
-void CmdWindow::LineClear(void)
-{
-    wmove(mWindow, 0, 0);
-    wdeleteln(mWindow);
-    wmove(mWindow, getmaxy(mWindow) - 1, 0);
-}
-
 void CmdWindow::StartShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
 {
     char c;
@@ -85,12 +26,13 @@ void CmdWindow::StartShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
              getcury(mWindow) == getmaxy(mWindow) - 1 )
         {
             c = wgetch(mWindow);
-            LineClear();
+            lineClear();
         }
         else {
             c = wgetch(mWindow);
         }
         mutPrintScr.unlock();
+
         switch (c)
         {
         case ' ':
@@ -102,7 +44,7 @@ void CmdWindow::StartShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
             break;
 
         case '\n':
-            PrintArgs(s);
+            printArgs(s);
             wprintw(mWindow, "> ");
             s.clear();
             bPrevSpace = false;
@@ -117,4 +59,63 @@ void CmdWindow::StartShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
             break;
         }
     }
+}
+
+int CmdWindow::printArgs(string input)
+{
+    initArgList(input.c_str());
+    char buf[1024];
+    int argCount = 0;
+
+    while (getNextArg(buf) != 0)
+    {
+
+        if (getcury(mWindow) == getmaxy(mWindow) - 1)
+            lineClear();
+        else
+            wmove(mWindow, getcury(mWindow) + 1, 0);
+
+        mvwprintw(mWindow, getcury(mWindow), 0, "arg %d : %s", argCount, buf);
+        argCount++;
+    }
+
+    if (getcury(mWindow) == getmaxy(mWindow) - 1)
+        lineClear();
+    else
+        wmove(mWindow, getcury(mWindow) + 1, 0);
+    return argCount;
+}
+
+void CmdWindow::lineClear(void)
+{
+    wmove(mWindow, 0, 0);
+    wdeleteln(mWindow);
+    wmove(mWindow, getmaxy(mWindow) - 1, 0);
+}
+
+void CmdWindow::initArgList(std::string args)
+{
+    arglist.argBuffer = args;
+    arglist.curArgIdx = 0;
+    arglist.curArgc = 0;
+}
+
+int CmdWindow::getNextArg(char *arg)
+{
+    int argLen, i;
+    if (arglist.argBuffer.size() <= arglist.curArgIdx)
+        return 0;
+
+    for (i = arglist.curArgIdx; i < arglist.argBuffer.size(); i++)
+    {
+        if (arglist.argBuffer[i] == ' ')
+        {
+            break;
+        }
+    }
+    argLen = i - arglist.curArgIdx;
+    memcpy(arg, arglist.argBuffer.c_str() + arglist.curArgIdx, argLen);
+    arg[argLen] = '\0';
+    arglist.curArgIdx += argLen + 1;
+    return argLen;
 }

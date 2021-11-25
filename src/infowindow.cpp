@@ -1,7 +1,6 @@
 #include "infowindow.h"
 #include <ncurses.h>
 #include <vector>
-#include <cstring>
 #include <sstream>
 #include <iomanip>
 
@@ -29,35 +28,28 @@ void InfoWindow::PrintTitle(void)
 
 void InfoWindow::PrintProcInfo(vector<ProcInfo> &procInfo) const
 {
-    for (int i = 0; i < getmaxy(mWindow)-3; i++ )
-    {
-        if (i < procInfo.size())
-        {
+    for ( int i = 0; i < getmaxy(mWindow)-3; i++ ) {
+        if ( i < procInfo.size() ) {
             mvwprintw(mWindow, i + 2, 0, "%8d%8d%10s",
                       procInfo[i].pid, procInfo[i].ppid, procInfo[i].comm.c_str());
         }
-        else{
-            for(int j=0; j<getmaxx(mWindow); j++) {
+        else {
+            for( int j=0; j<getmaxx(mWindow); j++ ) {
                 mvwaddch(mWindow, i+2, j, ' ');
             }
-            
         }
     }
+    
     touchwin(mWindow);
     wrefresh(mWindow);
 }
 
 void InfoWindow::WindowClear(void) const
 {
-    for (int i = 0; i < getmaxy(mWindow) - 3; i++)
-    {
+    for ( int i = 0; i < getmaxy(mWindow) - 3; i++ ) {
         mvwprintw(mWindow, i + 2, 1, "%26c", ' ');
     }
     
-/*
-    werase(mWindow);
-    box(mWindow, '|', '-');
-*/
     touchwin(mWindow);
     wrefresh(mWindow);
 }
