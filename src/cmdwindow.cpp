@@ -23,14 +23,20 @@ CmdWindow::CmdWindow(int endY, int endX, int begY, int begX)
 
 void CmdWindow::StartShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
 {
-    char c;
+    int c;
     std::string s;
-    int idx = 0;
     bool bPrevSpace = false;
+    int psX;
+    int psY;
     
+    curs_set(2);
+    keypad(mWindow, true);
     nodelay(mWindow, true);
     
     mvwprintw(mWindow, 0, 0, "> ");
+    psY = getcury(mWindow);
+    psX = 2;
+
     while ( true )
     {
         mutGetch.lock();
@@ -59,11 +65,32 @@ void CmdWindow::StartShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
             mCmd->UpdateProcStat();
             executeCommand(s);
             wprintw(mWindow, "> ");
+            psY = getcury(mWindow);
+            psX = 2;
             s.clear();
             bPrevSpace = false;
             break;
 
+        case KEY_IL:
+        case KEY_DL:
+        case KEY_PPAGE:
+        case KEY_NPAGE:
+        case KEY_HOME:
+        case KEY_END:
         case ERR:
+            break;
+
+        case KEY_BACKSPACE:
+            if ( !(getcurx(mWindow) <= psX && getcury(mWindow) == psY) )
+            {
+                if( !s.empty() ) s.pop_back();
+                wdelch(mWindow);
+            }
+            else {
+                if( !s.empty() ) s.pop_back();
+                wdelch(mWindow);
+                wmove(mWindow, psY, psX);
+            }
             break;
 
         default:
@@ -83,7 +110,7 @@ void CmdWindow::executeCommand(string &args)
     vector<CommandEntry>::iterator it;
     lineFeed();
     if ( getNextArg(buf) == 0 ) {
-        printStr("wrong input");
+        printStr( string("wrong input : ")+args );
         return;
     }
     cmd = buf;
@@ -109,7 +136,7 @@ void CmdWindow::executeCommand(string &args)
         }
     }
     if ( it == mCmdEntry->end() )
-        printStr("not found command");
+        printStr( string("not found command : ") + args );
 }
 
 void CmdWindow::executeInfo(void)
