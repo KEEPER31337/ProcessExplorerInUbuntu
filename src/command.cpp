@@ -106,9 +106,9 @@ void Command::UpdateProcStat(void)
             string line;
             while(ifss>>s){
                 getline(ifss,line);
-                if(s.find("Name")!=string::npos){
-                    ps.name=line;       //process name setting
-                }
+                //if(s.find("Name")!=string::npos){
+                //    ps.name=line;       //process name setting
+                //}
                 if(s.find("Thread")!=string::npos){
                     ps.nlwp=stoi(line); //# of thread setting
                 }

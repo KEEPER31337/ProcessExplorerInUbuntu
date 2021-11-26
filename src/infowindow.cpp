@@ -28,7 +28,7 @@ void InfoWindow::PrintTitle(void)
        << setw(8)  << "USER"
        << setw(8)  << "START"
        << setw(8)  << "TH"
-       << setw(20)  << "NAME"
+       //<< setw(20)  << "NAME"
        ;
 
     PrintLine(ss.str());

@@ -22,7 +22,7 @@ struct ProcInfo {
         << "USER : "     << user    << ", "
         << "START : "    << start   << ", "
         << "THREADS : "  << nlwp    << ", "
-        << "PNAME : "    << name    << ", "
+        //<< "PNAME : "    << name    << ", "
         ;
 
         return ss.str();
@@ -40,7 +40,7 @@ struct ProcInfo {
            << setw(8)  << user 
            << setw(8)  << start
            << setw(8)  << nlwp 
-           << setw(20) << name 
+           //<< setw(20) << name 
         ;
 
         return ss.str();
@@ -55,5 +55,5 @@ struct ProcInfo {
     string  user;       // 프로세스 사용 유저명
     string  start;      // 프로세스 시작 시간
     int     nlwp;       // # of threads (number of light weight process)
-    string  name;       // process name
+    //string  name;       // process name
 };
