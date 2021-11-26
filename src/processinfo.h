@@ -33,14 +33,14 @@ struct ProcInfo {
         stringstream ss;
         ss << setw(8)  << pid  
            << setw(8)  << ppid 
-           << setw(10) << comm 
+           << setw(20) << comm 
            << setw(8)  << cpu  
            << setw(12) << vmem 
-           << setw(8)  << state
+           << setw(5)  << state
            << setw(8)  << user 
            << setw(8)  << start
            << setw(8)  << nlwp 
-           << setw(8)  << name 
+           << setw(20) << name 
         ;
 
         return ss.str();
