@@ -3,6 +3,8 @@
 #include "processinfo.h"
 #include <mutex>
 
+using namespace std;
+
 typedef struct CommandEntry {
     CommandEntry(string _cmd, string _help)
         : cmd(_cmd)
@@ -16,7 +18,7 @@ class CmdWindow : public Window
 {
 public:
     CmdWindow(int endY, int endX, int begY, int begX);
-    void StartShell(std::mutex &mutPrintScr, std::mutex &mutGetch);
+    void StartShell(mutex &mutPrintScr, mutex &mutGetch);
     
 private:
     void   executeCommand     (string &args);
@@ -26,12 +28,12 @@ private:
     void   executeKill        (void);
     void   executeSearch      (void);
     void   executeHelp        (void);
-    int    printArgs          (std::string input);
+    int    printArgs          (string input);
     void   initArgList        (string args);
     int    getNextArg         (char *arg);
     
     struct argList {
-        std::string argBuffer;
+        string argBuffer;
         int curArgIdx;
         int curArgc;
     } arglist;

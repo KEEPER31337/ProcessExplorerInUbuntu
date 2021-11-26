@@ -3,6 +3,8 @@
 
 #pragma once
 
+using namespace std;
+
 class Window
 {
 public:
@@ -10,9 +12,9 @@ public:
     void   PrintSize          (void) const;
     WINDOW *GetWindow         (void) const;
     void   lineFeed           (void);
-    void   printStr           (std::string s);
+    void   printStr           (string s);
     void   lineClear          (void);
-    void   mvPrintLine         (int y, int x, std::string s);
+    void   mvPrintLine         (int y, int x, string s);
     /*
         no more need
     void drawBorder(void) const;

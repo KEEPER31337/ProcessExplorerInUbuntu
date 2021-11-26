@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <string>
 
+using namespace std;
+
 /*
     base Window functions
 */
@@ -43,7 +45,7 @@ void Window::lineFeed(void)
 }
 
 // require string new line (x == 0)
-void Window::printStr(std::string s)
+void Window::printStr(string s)
 {
     int curIdx = 0;
 
@@ -56,7 +58,7 @@ void Window::printStr(std::string s)
     }
 }
 
-void Window::mvPrintLine(int y, int x, std::string s)
+void Window::mvPrintLine(int y, int x, string s)
 {
     mvwaddnstr(mWindow, y, x, s.c_str(), getmaxx(mWindow));
 }

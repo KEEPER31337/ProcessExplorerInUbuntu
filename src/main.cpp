@@ -5,21 +5,23 @@
 #include <thread>
 #include <mutex>
 
+using namespace std;
+
 InfoWindow *infoWindow;
 CmdWindow *cmdWindow;
 Command *cmd;
 char buf[1024];
 
-std::mutex *mutPrintScr;
-std::mutex *mutGetch;
+mutex *mutPrintScr;
+mutex *mutGetch;
 
 void InitWindow(void)
 {
     initscr();
     start_color();
 
-    mutPrintScr = new std::mutex;
-    mutGetch = new std::mutex;
+    mutPrintScr = new mutex;
+    mutGetch = new mutex;
 
     infoWindow = new InfoWindow(getmaxy(stdscr) - 11, getmaxx(stdscr), 0, 0);
     cmdWindow = new CmdWindow(9, getmaxx(stdscr), getmaxy(stdscr) - 9, 0);
@@ -69,8 +71,8 @@ void EndWindow(void)
 
 void Working(void)
 {
-    std::thread infoWinThread(InfoWindowThreadFunc);
-    std::thread cmdWinThread(CmdWindowThreadFunc);
+    thread infoWinThread(InfoWindowThreadFunc);
+    thread cmdWinThread(CmdWindowThreadFunc);
 
     infoWinThread.join();
     cmdWinThread.join();

@@ -13,9 +13,9 @@ typedef struct fileData {
     unsigned long long length;
 } fileData;
 
-const std::string VIRUSTOTAL_URL = "https://www.virustotal.com/vtapi/v2/";
-const std::string VIRUSTOTAL_SCAN_URL = "https://www.virustotal.com/vtapi/v2/file/scan";
-const std::string APIKEY = "717e5ae38a274a05ecebbdb08291a3350fdbde97b29b1ff03666c4d95d543a3a";
+const string VIRUSTOTAL_URL = "https://www.virustotal.com/vtapi/v2/";
+const string VIRUSTOTAL_SCAN_URL = "https://www.virustotal.com/vtapi/v2/file/scan";
+const string APIKEY = "717e5ae38a274a05ecebbdb08291a3350fdbde97b29b1ff03666c4d95d543a3a";
 
 class Command
 {
@@ -50,18 +50,18 @@ private:
     string getUserName(char* path);
 
     //for virus total
-    fileData &getFileData(std::string &fileName);
-    std::string &base64(fileData &filedata);
+    fileData &getFileData(string &fileName);
+    string &base64(fileData &filedata);
     
-    std::string &makeScanPostFields(std::string &fileName);
-    std::string &makeReportGetURL(std::string &resource);
-    std::string &requestReport(std::string resource);
-    std::string &requestScan(std::string &fileName);
-    Json::Value &parsingJson(std::string &data);
+    string &makeScanPostFields(string &fileName);
+    string &makeReportGetURL(string &resource);
+    string &requestReport(string resource);
+    string &requestScan(string &fileName);
+    Json::Value &parsingJson(string &data);
 
     SysInfo *mSysInfo;
     vector<ProcInfo> *mProcInfo;
     Mode mMode;
 };
 
-static size_t writeMemory(char *data, size_t size, size_t nmemb, std::string *s);
+static size_t writeMemory(char *data, size_t size, size_t nmemb, string *s);

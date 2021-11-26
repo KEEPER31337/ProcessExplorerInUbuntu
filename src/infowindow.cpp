@@ -4,11 +4,13 @@
 #include <sstream>
 #include <iomanip>
 
+using namespace std;
+
 InfoWindow::InfoWindow(int endY, int endX, int begY, int begX)
     : Window(endY, endX, begY, begX)
 {}
 
-void InfoWindow::PrintLine(std::string s)
+void InfoWindow::PrintLine(string s)
 {
     mvwaddnstr(mWindow, getcury(mWindow), 0, s.c_str(), getmaxx(mWindow));
 }
