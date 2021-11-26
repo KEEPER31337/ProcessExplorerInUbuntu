@@ -36,6 +36,7 @@ void InfoWindow::PrintTitle(void)
 
 void InfoWindow::PrintProcInfo(vector<ProcInfo> &procInfo)
 {
+    curs_set(0);
     for ( int i = 0; i < getmaxy(mWindow)-3; i++ ) {
         if ( i < procInfo.size() ) {
             mvPrintLine(i+1, 0, procInfo[i].procInfoToStr());
