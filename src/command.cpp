@@ -39,7 +39,7 @@ Command::Command()
 {
     mSysInfo = new SysInfo();
     setSysInfo();
-    mProcInfo = new vector<ProcInfo>;
+    mProcInfos = new vector<ProcInfo>;
 }
 
 void Command::SetMode(Mode m) 
@@ -53,7 +53,7 @@ Command::Mode Command::GetMode(void) const
 
 vector<ProcInfo> &Command::GetProcInfos(void) const 
 { 
-    return *mProcInfo; 
+    return *mProcInfos; 
 }
 
 void Command::UpdateProcStat(void)
@@ -66,7 +66,7 @@ void Command::UpdateProcStat(void)
         cerr << "cannot open /proc dir" << endl;
     }
     chdir("/proc");
-    mProcInfo->clear();
+    mProcInfos->clear();
 
     while ((direntry = readdir(dp)) != NULL) {
         
@@ -130,7 +130,7 @@ void Command::UpdateProcStat(void)
             ps.start = getStartTime(mSysInfo->uptime, stoul(t[21]));
             ps.vmem  = stoul(t[22]);
 
-            mProcInfo->push_back(ps);
+            mProcInfos->push_back(ps);
 
             ifs.close();
         }
@@ -138,6 +138,7 @@ void Command::UpdateProcStat(void)
     if (closedir(dp) == -1) {
         cerr << "dir close error" << endl;
     }
+    sortProcInfos(compareByCPU);
 }
 
 void Command::setSysInfo(void) //sysinfo의 값 설정
@@ -223,14 +224,14 @@ ProcInfo Command::GetProcInfoByPID(int pid)
     ProcInfo selecProc;
     UpdateProcStat();
     vector<ProcInfo>::iterator it;
-    for(it = mProcInfo->begin(); it != mProcInfo->end(); ++it)
+    for(it = mProcInfos->begin(); it != mProcInfos->end(); ++it)
     {
         if( it->pid == pid ) {
             selecProc = *it;
             break;
         }
     }
-    if( it == mProcInfo->end() )
+    if( it == mProcInfos->end() )
         selecProc.pid = -1;
     return selecProc;
 }
@@ -240,7 +241,7 @@ vector<ProcInfo> *Command::GetProcInfoByPPID(int ppid)
     result = new vector<ProcInfo>;
 
     vector<ProcInfo>::iterator it;
-    for(it = mProcInfo->begin(); it != mProcInfo->end(); ++it) {
+    for(it = mProcInfos->begin(); it != mProcInfos->end(); ++it) {
         if(it->ppid == ppid) {
             result->push_back(*it);
         }
@@ -309,7 +310,21 @@ string Command::GetProcPath(int pid)
     return string(buf);
 }
 
+void Command::sortProcInfos(bool(*cmpFunc)(ProcInfo&, ProcInfo&))
+{
+    sort(mProcInfos->begin(), mProcInfos->end(), cmpFunc);
+}
+
+bool compareByCPU(ProcInfo &p1, ProcInfo &p2)
+{
+    if( p1.cpu == p2.cpu )
+        return p1.pid > p2.pid;
+    return p1.cpu >= p2.cpu;
+}
+
+///////////////////////////
 // for virustotal
+///////////////////////////
 string Command::GetVirusTotalReport(int pid)
 {
     stringstream result;
