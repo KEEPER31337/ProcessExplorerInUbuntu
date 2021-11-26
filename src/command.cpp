@@ -122,13 +122,13 @@ void Command::UpdateProcStat(void)
                 }
             }
             
-            ps.pid   = stoul(t[0]);
-            ps.ppid  = stoul(t[3]);
+            ps.pid   = stoull(t[0]);
+            ps.ppid  = stoull(t[3]);
             ps.state = t[2][0];
             ps.comm  = t[1];
-            ps.cpu   = getCpuTime(stoul(t[13]), stoul(t[14]), stoul(t[21]), mSysInfo->uptime);
-            ps.start = getStartTime(mSysInfo->uptime, stoul(t[21]));
-            ps.vmem  = stoul(t[22]);
+            ps.cpu   = getCpuTime(stoull(t[13]), stoull(t[14]), stoull(t[21]), mSysInfo->uptime);
+            ps.start = getStartTime(mSysInfo->uptime, stoull(t[21]));
+            ps.vmem  = stoull(t[22]) / 1024;    // KB 단위
 
             mProcInfos->push_back(ps);
 

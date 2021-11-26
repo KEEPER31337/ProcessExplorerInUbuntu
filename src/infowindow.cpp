@@ -21,13 +21,13 @@ void InfoWindow::PrintTitle(void)
 
     ss << setw(8)  << "PID" 
        << setw(8)  << "PPID" 
-       << setw(20) << "COMM"
        << setw(8)  << "CPU"
        << setw(12) << "MEM"
        << setw(5)  << "STAT"
        << setw(8)  << "USER"
        << setw(8)  << "START"
        << setw(8)  << "TH"
+       << setw(20) << "COMM"
        //<< setw(20)  << "NAME"
        ;
 
