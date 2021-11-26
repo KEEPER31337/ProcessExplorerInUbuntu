@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <mutex>
 #include "command.h"
+#include "processinfo.h"
 
 CmdWindow::CmdWindow(int endY, int endX, int begY, int begX)
     : Window(endY, endX, begY, begX)
@@ -12,12 +13,12 @@ CmdWindow::CmdWindow(int endY, int endX, int begY, int begX)
 {
     mCmdEntry = new vector<CommandEntry>;
 
-    mCmdEntry->push_back(CommandEntry{"info",        "info [PID] - display the information of processs' detail informain"});
-    mCmdEntry->push_back(CommandEntry{"path",        "path [PID] - display the path of each process"});
-    mCmdEntry->push_back(CommandEntry{"viruscheck",  "viruscheck [PID] - check a status which process is infection"});
-    mCmdEntry->push_back(CommandEntry{"kill",        "kill [PID] [SGINAL_NUM] - send a signal to process"});
-    mCmdEntry->push_back(CommandEntry{"search",      "search [PID] [KEYWORD] - search the processes using keyword"});
-    mCmdEntry->push_back(CommandEntry{"help",        "print help"});
+    mCmdEntry->push_back( CommandEntry("info",        "info [PID] - display the information of processs' detail informain") );
+    mCmdEntry->push_back( CommandEntry("path",        "path [PID] - display the path of each process") );
+    mCmdEntry->push_back( CommandEntry("viruscheck",  "viruscheck [PID] - check a status which process is infection") );
+    mCmdEntry->push_back( CommandEntry("kill",        "kill [PID] [SGINAL_NUM] - send a signal to process") );
+    mCmdEntry->push_back( CommandEntry("search",      "search [PID] [KEYWORD] - search the processes using keyword") );
+    mCmdEntry->push_back( CommandEntry("help",        "print help") );
 }
 
 void CmdWindow::StartShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
@@ -55,6 +56,7 @@ void CmdWindow::StartShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
             break;
 
         case '\n':
+            mCmd->UpdateProcStat();
             executeCommand(s);
             wprintw(mWindow, "> ");
             s.clear();
@@ -89,7 +91,7 @@ void CmdWindow::executeCommand(string &args)
     for ( it=mCmdEntry->begin(); it != mCmdEntry->end(); it++ ) {
         if( cmd.compare(it->cmd) == 0 ) {
 
-             if( cmd.compare("help") == 0 )
+            if( cmd.compare("help") == 0 )
                 executeHelp();
             else if( cmd.compare("path") == 0 )
                 executePath();
@@ -97,8 +99,10 @@ void CmdWindow::executeCommand(string &args)
                 executeVirusCheck();
             else if( cmd.compare("kill") == 0 )
                 executeKill();
-            else if( cmd.compare("search") == 0 )
-                executeSearch();
+            //else if( cmd.compare("search") == 0 )
+                //executeSearch();
+            else if( cmd.compare("info") == 0 )
+                executeInfo();
 
             break;
 
@@ -112,25 +116,20 @@ void CmdWindow::executeInfo(void)
 {
     int pid;
     char buf[1024];
+    stringstream ss;
 
-    if ( getNextArg(buf) == 0 ) 
-    {
+    if ( getNextArg(buf) == 0 ) {
         printStr("wrong input");
         return;
     }
     pid = stoi(buf);
+
     ProcInfo information = mCmd->GetProcInfoByPID(pid);
-    if(information.pid == -1)
-    {
+    if( information.pid == -1 ) {
         printStr("not found pid");
-    } else {
-        string a = "";
-        a = a + "PID : " + to_string(information.pid) + 
-        ", PPID : " + to_string(information.ppid) + 
-        ", ST : " + information.state + 
-        ", COMMAND :  " + information.comm +
-        ", START : " + information.start;
-        printStr(a);
+    } 
+    else {
+        printStr(procInfoToStr(information));
     }
 }
 
@@ -144,6 +143,8 @@ void CmdWindow::executePath(void)
         return;
     }
     pid = stoi(buf);
+
+    printStr(mCmd->GetProcPath(pid));
 
 }
 
@@ -175,19 +176,24 @@ void CmdWindow::executeKill(void)
 void CmdWindow::executeSearch(void)
 {
     char buf[1024];
-    string attr;
+    string kind;
     string keyword;
+    vector<ProcInfo> *procinfos;
     if ( getNextArg(buf) == 0 ) {
-        printStr("!need attribute!");
+        printStr("!need kind!");
         return;
     }
-    attr = buf;
+    kind = buf;
     if ( getNextArg(buf) == 0 ) {
         printStr("!need keyword!");
         return;
     }
     keyword = buf;
-    mCmd->SearchProc(mCmd->GetProcInfos(),attr, keyword, *mCmd);
+    *procinfos = mCmd->SearchProc( mCmd->GetProcInfos(), kind, keyword );
+
+    for( auto it = procinfos->begin(); it != procinfos->end(); ++it) {
+        printStr( procInfoToStr(*it) );
+    }
 }
 
 
@@ -272,4 +278,22 @@ int CmdWindow::getNextArg(char *arg)
     arg[argLen] = '\0';
     arglist.curArgIdx += argLen + 1;
     return argLen;
+}
+
+string CmdWindow::procInfoToStr(ProcInfo &pi)
+{
+    stringstream ss;
+    ss << "PID : "      << pi.pid     << ", "
+       << "PPID : "     << pi.ppid    << ", "
+       << "COMMAND : "  << pi.comm    << ", "
+       << "CPU : "      << pi.cpu     << ", "
+       << "MEM : "      << pi.vmem    << ", "
+       << "STAT : "     << pi.state   << ", "
+       << "USER : "     << pi.user    << ", "
+       << "START : "    << pi.start   << ", "
+       << "THREADS : "  << pi.nlwp    << ", "
+       << "PNAME : "    << pi.name    << ", "
+       ;
+
+    return ss.str();
 }

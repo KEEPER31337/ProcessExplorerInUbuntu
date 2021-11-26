@@ -1,5 +1,5 @@
 GCC = g++
-OBJS = main.o window.o infowindow.o cmdwindow.o command.o 
+OBJS = main.o window.o infowindow.o command.o cmdwindow.o
 
 all: main
 
@@ -7,7 +7,7 @@ all: main
 	$(GCC) -c $<
 
 main: $(OBJS)
-	$(GCC) -o $@ $(OBJS) -lncurses -lpthread -I.
+	$(GCC) -o $@ $(OBJS) -lncurses -lpthread -I. --std=c++11
 
 clean:
 	rm -f main $(OBJS)

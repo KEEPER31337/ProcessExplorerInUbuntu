@@ -1,6 +1,6 @@
 #include "processinfo.h"
 #include "sysinfo.h"
-#include "search.h"
+//#include "search.h"
 
 #pragma once
 
@@ -26,19 +26,18 @@ public:
 
     // shell command functions
     string GetHelp(string cmdFunc);
-    ProcInfo GetProcInfoByPID(int PID);
-    ProcInfo GetProcInfoByPPID(int PPID);
-    void SendSignal(int PID, int signalNum);
-    void RestartProc(int PID, string procPath);
-    vector<ProcInfo> &SearchProc(vector<ProcInfo>& procInfo, std::string procAttr, std::string proc, Command &cmd);
-
+    ProcInfo GetProcInfoByPID(int pid);
+    vector<ProcInfo> &GetProcInfoByPPID(int ppid);
+    void SendSignal(int pid, int signalNum);
+    vector<ProcInfo> &SearchProc(vector<ProcInfo> &procInfo, string procAttr, string proc);
+    string GetProcPath(int pid);
 
 private:
     // for update proc status
-    void SetSysInfo(void);
-    double GetCpuTime(ULL utime, ULL stime, ULL starttime, int seconds);
-    string GetStartTime(ULL uptime, ULL stime);
-    string GetUserName(char* path);
+    void setSysInfo(void);
+    double getCpuTime(ULL utime, ULL stime, ULL starttime, int seconds);
+    string getStartTime(ULL uptime, ULL stime);
+    string getUserName(char* path);
 
     SysInfo *mSysInfo;
     vector<ProcInfo> *mProcInfo;

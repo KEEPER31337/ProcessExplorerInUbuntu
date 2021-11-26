@@ -17,9 +17,17 @@ void InfoWindow::PrintTitle(void)
 {
     stringstream ss;
 
-    ss << setw(8) << "PID" 
-       << setw(8) << "PPID" 
-       << setw(10) << "COMM";
+    ss << setw(8)  << "PID" 
+       << setw(8)  << "PPID" 
+       << setw(10) << "COMM"
+       << setw(8)  << "CPU"
+       << setw(8)  << "MEM"
+       << setw(8)  << "STAT"
+       << setw(8)  << "USER"
+       << setw(8)  << "START"
+       << setw(8)  << "TH"
+       << setw(8)  << "NAME"
+       ;
 
     PrintLine(ss.str());
     touchwin(mWindow);
@@ -39,7 +47,7 @@ void InfoWindow::PrintProcInfo(vector<ProcInfo> &procInfo) const
             }
         }
     }
-    
+
     touchwin(mWindow);
     wrefresh(mWindow);
 }
