@@ -26,13 +26,9 @@ private:
     void   executeKill        (void);
     void   executeSearch      (void);
     void   executeHelp        (void);
-    void   lineFeed           (void);
-    void   printStr           (string s);
     int    printArgs          (std::string input);
-    void   lineClear          (void);
     void   initArgList        (string args);
     int    getNextArg         (char *arg);
-    string procInfoToStr      (ProcInfo &pi);
     
     struct argList {
         std::string argBuffer;
