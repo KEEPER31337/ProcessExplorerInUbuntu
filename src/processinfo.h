@@ -13,15 +13,15 @@ struct ProcInfo {
     string procInfoToStrWithName(void)
     {
         stringstream ss;
-        ss << "PID : "   << pid     << ", "
-        << "PPID : "     << ppid    << ", "
-        << "COMMAND : "  << comm    << ", "
-        << "CPU : "      << cpu     << ", "
-        << "MEM : "      << vmem    << ", "
-        << "STAT : "     << state   << ", "
-        << "USER : "     << user    << ", "
-        << "START : "    << start   << ", "
-        << "THREADS : "  << nlwp    << ", "
+        ss << "PID : "   << pid   << ", "
+        << "PPID : "     << ppid  << ", "
+        << "CPU : "      << cpu   << ", "
+        << "MEM : "      << vmem  << ", "
+        << "STAT : "     << state << ", "
+        << "USER : "     << user  << ", "
+        << "START : "    << start << ", "
+        << "THREADS : "  << nlwp  << ", "
+        << "COMMAND : "  << comm  << ", "
         //<< "PNAME : "    << name    << ", "
         ;
 
@@ -33,13 +33,13 @@ struct ProcInfo {
         stringstream ss;
         ss << setw(8)  << pid  
            << setw(8)  << ppid 
-           << setw(20) << comm 
            << setw(8)  << cpu  
            << setw(12) << vmem 
            << setw(5)  << state
            << setw(8)  << user 
            << setw(8)  << start
            << setw(8)  << nlwp 
+           << setw(20) << comm 
            //<< setw(20) << name 
         ;
 
