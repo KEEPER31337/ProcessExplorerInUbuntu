@@ -70,7 +70,10 @@ void Command::UpdateProcStat(void)
 
     while ((direntry = readdir(dp)) != NULL) {
         
-        lstat(direntry->d_name, &statbuf);
+        if ( lstat(direntry->d_name, &statbuf) == -1 ) {
+            cerr << "lstat error : " << direntry->d_name << endl;
+            continue;
+        }
 
         if (S_ISDIR(statbuf.st_mode) && isdigit(direntry->d_name[0])) {
             char pDir[20];    //현재 프로세스 파일명(pid)을 저장해둘 변수
@@ -95,7 +98,10 @@ void Command::UpdateProcStat(void)
 
             struct stat statfile;   // /[pid]/stat 파일의 정보를 담을 변수
             struct passwd *upasswd;
-            stat(direntry->d_name,&statfile);   //statfile 변수에 값 할당
+            if ( stat(direntry->d_name,&statfile) == -1 ) {   //statfile 변수에 값 할당
+                cerr << "stat error : " << direntry->d_name << endl;
+                continue;
+            }
             upasswd = getpwuid(statfile.st_uid);
             ps.user = upasswd->pw_name;
 
@@ -106,21 +112,23 @@ void Command::UpdateProcStat(void)
             string line;
             while(ifss>>s){
                 getline(ifss,line);
-                //if(s.find("Name")!=string::npos){
-                //    ps.name=line;       //process name setting
-                //}
+                /*
+                if(s.find("Name")!=string::npos){
+                    ps.name=line;       // process name setting
+                }
+                */
                 if(s.find("Thread")!=string::npos){
                     ps.nlwp=stoi(line); //# of thread setting
                 }
             }
             
-            ps.pid      = stoul(t[0]);
-            ps.ppid     = stoul(t[3]);
-            ps.state    = t[2][0];
-            ps.comm     = t[1];
-            ps.cpu      = getCpuTime(stoul(t[13]), stoul(t[14]), stoul(t[21]), mSysInfo->uptime);
-            ps.start    = getStartTime(mSysInfo->uptime, stoul(t[21]));
-            ps.vmem     = stoul(t[22]);
+            ps.pid   = stoul(t[0]);
+            ps.ppid  = stoul(t[3]);
+            ps.state = t[2][0];
+            ps.comm  = t[1];
+            ps.cpu   = getCpuTime(stoul(t[13]), stoul(t[14]), stoul(t[21]), mSysInfo->uptime);
+            ps.start = getStartTime(mSysInfo->uptime, stoul(t[21]));
+            ps.vmem  = stoul(t[22]);
 
             mProcInfo->push_back(ps);
 
