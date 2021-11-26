@@ -43,6 +43,7 @@ public:
     string GetVirusTotalReport(int pid);
 
 private:
+    void sortProcInfos(bool(*cmpFunc)(ProcInfo&, ProcInfo&));
     // for update proc status
     void setSysInfo(void);
     double getCpuTime(ULL utime, ULL stime, ULL starttime, int seconds);
@@ -60,8 +61,9 @@ private:
     Json::Value &parsingJson(string &data);
 
     SysInfo *mSysInfo;
-    vector<ProcInfo> *mProcInfo;
+    vector<ProcInfo> *mProcInfos;
     Mode mMode;
 };
 
 static size_t writeMemory(char *data, size_t size, size_t nmemb, string *s);
+bool compareByCPU(ProcInfo &p1, ProcInfo &p2);
