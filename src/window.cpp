@@ -1,6 +1,7 @@
 #include "window.h"
 #include <ncurses.h>
 #include <unistd.h>
+#include <string>
 
 /*
     base Window functions
@@ -24,4 +25,38 @@ void Window::PrintSize(void) const
 WINDOW *Window::GetWindow(void) const
 {
     return mWindow;
+}
+
+void Window::lineClear(void)
+{
+    wmove(mWindow, 0, 0);
+    wdeleteln(mWindow);
+    wmove(mWindow, getmaxy(mWindow) - 1, 0);
+}
+
+void Window::lineFeed(void)
+{
+    if (getcury(mWindow) == getmaxy(mWindow) - 1)
+        lineClear();
+    else
+        wmove(mWindow, getcury(mWindow) + 1, 0);
+}
+
+// require string new line (x == 0)
+void Window::printStr(std::string s)
+{
+    int curIdx = 0;
+
+    while ( curIdx < s.size() ) {
+
+        mvwaddnstr(mWindow, getcury(mWindow), 0, s.c_str()+curIdx, getmaxx(mWindow));
+
+        curIdx += getmaxx(mWindow);
+        lineFeed();
+    }
+}
+
+void Window::mvPrintLine(int y, int x, std::string s)
+{
+    mvwaddnstr(mWindow, y, x, s.c_str(), getmaxx(mWindow));
 }
