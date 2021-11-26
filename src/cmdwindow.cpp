@@ -134,7 +134,7 @@ void CmdWindow::executeCommand(string &args)
             else if( cmd.compare("info") == 0 )
                 executeInfo();
             else if( cmd.compare("exit") == 0 )
-                system("kill -9 `pidof ./main`");
+                system("kill -9 `pidof ./main`; reset");
 
             break;
 
