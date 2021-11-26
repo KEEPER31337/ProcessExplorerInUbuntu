@@ -21,7 +21,7 @@ void InfoWindow::PrintTitle(void)
        << setw(8)  << "PPID" 
        << setw(10) << "COMM"
        << setw(8)  << "CPU"
-       << setw(8)  << "MEM"
+       << setw(12) << "MEM"
        << setw(8)  << "STAT"
        << setw(8)  << "USER"
        << setw(8)  << "START"
@@ -34,16 +34,15 @@ void InfoWindow::PrintTitle(void)
     wrefresh(mWindow);
 }
 
-void InfoWindow::PrintProcInfo(vector<ProcInfo> &procInfo) const
+void InfoWindow::PrintProcInfo(vector<ProcInfo> &procInfo)
 {
     for ( int i = 0; i < getmaxy(mWindow)-3; i++ ) {
         if ( i < procInfo.size() ) {
-            mvwprintw(mWindow, i + 2, 0, "%8d%8d%10s",
-                      procInfo[i].pid, procInfo[i].ppid, procInfo[i].comm.c_str());
+            mvPrintLine(i+1, 0, procInfo[i].procInfoToStr());
         }
         else {
             for( int j=0; j<getmaxx(mWindow); j++ ) {
-                mvwaddch(mWindow, i+2, j, ' ');
+                mvPrintLine(i+1, 0, "");
             }
         }
     }
