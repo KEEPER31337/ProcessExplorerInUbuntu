@@ -1,5 +1,5 @@
 GCC = g++
-OBJS = main.o window.o infowindow.o command.o cmdwindow.o
+OBJS = main.o window.o infowindow.o command.o cmdwindow.o jsoncpp.o
 
 all: main
 
@@ -7,7 +7,7 @@ all: main
 	$(GCC) -c $<
 
 main: $(OBJS)
-	$(GCC) -o $@ $(OBJS) -lncurses -lpthread -I. --std=c++11
+	$(GCC) -o $@ $(OBJS) -lcurl -lcrypto -lncurses -lpthread -I. --std=c++11
 
 clean:
 	rm -f main $(OBJS)
