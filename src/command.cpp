@@ -1,17 +1,9 @@
-// opendir readdir
 #include <dirent.h>
-
-// chdir
 #include <unistd.h>
-
-// struct stat
 #include <sys/stat.h>
-
-// cerr
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
-
 #include <fcntl.h>
 #include <sys/types.h>
 #include <pwd.h>
@@ -19,12 +11,15 @@
 #include <cstring>
 #include <vector>
 #include <signal.h>
+#include <sstream>
+#include <limits.h>
 
 // for debug
 #include <cassert>
 
 #include "processinfo.h"
 #include "command.h"
+#include "search.h"
 
 using namespace std;
 
@@ -34,7 +29,7 @@ Command::Command()
     : mMode(PRINTPROCINFO)
 {
     mSysInfo = new SysInfo();
-    SetSysInfo();
+    setSysInfo();
     mProcInfo = new vector<ProcInfo>;
 }
 
@@ -93,7 +88,7 @@ void Command::UpdateProcStat(void)
             struct passwd *upasswd;
             stat(direntry->d_name,&statfile);   //statfile 변수에 값 할당
             upasswd = getpwuid(statfile.st_uid);
-            ps.username = upasswd->pw_name;
+            ps.user = upasswd->pw_name;
 
             ifstream ifss(strcat(pDir,"/status"));
             if(!ifss.is_open()){    // status file exception
@@ -114,8 +109,8 @@ void Command::UpdateProcStat(void)
             ps.ppid     = stoi(t[3]);
             ps.state    = t[2][0];
             ps.comm     = t[1];
-            ps.cpu      = GetCpuTime(stoi(t[13]), stoi(t[14]), stoi(t[21]), mSysInfo->uptime);
-            ps.start    = GetStartTime(mSysInfo->uptime, stoi(t[21]));
+            ps.cpu      = getCpuTime(stoi(t[13]), stoi(t[14]), stoi(t[21]), mSysInfo->uptime);
+            ps.start    = getStartTime(mSysInfo->uptime, stoi(t[21]));
             ps.vmem     = stoi(t[22]);
 
             mProcInfo->push_back(ps);
@@ -128,7 +123,7 @@ void Command::UpdateProcStat(void)
     }
 }
 
-void Command::SetSysInfo(void) //sysinfo의 값 설정
+void Command::setSysInfo(void) //sysinfo의 값 설정
 {
     FILE *fp;
     double stime;
@@ -145,7 +140,7 @@ void Command::SetSysInfo(void) //sysinfo의 값 설정
     mSysInfo->uptime = stime;
 }
 
-double Command::GetCpuTime(ULL utime, ULL stime, ULL starttime, int seconds) //CPU 점유율
+double Command::getCpuTime(ULL utime, ULL stime, ULL starttime, int seconds) //CPU 점유율
 {
     ULL total_time;
     int pcpu = 0;
@@ -159,7 +154,7 @@ double Command::GetCpuTime(ULL utime, ULL stime, ULL starttime, int seconds) //C
     return pcpu / 10.0;
 }
 
-string Command::GetStartTime(ULL uptime, ULL stime) //문자열 포맷 형식에 따라 프로세스 시작시간을 문자열로 반환하는 함수
+string Command::getStartTime(ULL uptime, ULL stime) //문자열 포맷 형식에 따라 프로세스 시작시간을 문자열로 반환하는 함수
 {
     char result[16];
     unsigned int hertz = (unsigned int)sysconf(_SC_CLK_TCK);
@@ -183,7 +178,7 @@ string Command::GetStartTime(ULL uptime, ULL stime) //문자열 포맷 형식에
     return str;
 }
 
-string Command::GetUserName(char *filepath)
+string Command::getUserName(char *filepath)
 {
     struct passwd *upasswd;
     struct stat lstat;
@@ -201,110 +196,97 @@ string Command::GetUserName(char *filepath)
     }
 }
 
-void Command::SendSignal(int PID, int signalNum)
+void Command::SendSignal(int pid, int signalNum)
 {
-    kill(PID, signalNum);
+    kill(pid, signalNum);
 }
 
-ProcInfo Command::GetProcInfoByPID(int PID)
+ProcInfo Command::GetProcInfoByPID(int pid)
 {
     ProcInfo selecProc;
-
-    int check = 0;
-    vector<ProcInfo>::iterator ptr;
-    for(ptr = mProcInfo->begin(); ptr != mProcInfo->end(); ++ptr)
+    UpdateProcStat();
+    vector<ProcInfo>::iterator it;
+    for(it = mProcInfo->begin(); it != mProcInfo->end(); ++it)
     {
-        if(ptr->pid == PID) 
-        {
-            selecProc.pid = ptr->pid;
-            selecProc.ppid = ptr->ppid;
-            selecProc.state = ptr->state;
-            selecProc.comm = ptr->comm;
-            selecProc.start = ptr->start;
-            check++;
+        if( it->pid == pid ) {
+            selecProc = *it;
             break;
         }
     }
-    if(!check) selecProc.pid = -1;
+    if( it == mProcInfo->end() )
+        selecProc.pid = -1;
     return selecProc;
 }
-ProcInfo Command::GetProcInfoByPPID(int PPID)
+vector<ProcInfo> &Command::GetProcInfoByPPID(int ppid)
 {
-    ProcInfo selecProc;
-    
-    int check = 0;
-    vector<ProcInfo>::iterator ptr;
-    for(ptr = mProcInfo->begin(); ptr != mProcInfo->end(); ++ptr)
-    {
-        if(ptr->ppid == PPID) 
-        {
-            selecProc.pid = ptr->pid;
-            selecProc.ppid = ptr->ppid;
-            selecProc.state = ptr->state;
-            selecProc.comm = ptr->comm;
-            selecProc.start = ptr->start;
-            check++;
-            break;
+    vector<ProcInfo> *result;
+    result = new vector<ProcInfo>;
+
+    vector<ProcInfo>::iterator it;
+    for(it = mProcInfo->begin(); it != mProcInfo->end(); ++it) {
+        if(it->ppid == ppid) {
+            result->push_back(*it);
         }
     }
-    if(!check) selecProc.pid = -1;
-    return selecProc;
+
+    return *result;
 }
 
-vector<ProcInfo> &SearchProc(vector<ProcInfo>& procInfo, std::string procAttr, std::string proc, Command &cmd)
+vector<ProcInfo> &Command::SearchProc(vector<ProcInfo> &procInfo, std::string kind, std::string proc)
 {
-    vector<ProcInfo> *resultProc;
-    Search *conv;
-    
+    vector<ProcInfo> *resultProc;    
     resultProc = new vector<ProcInfo>;
 
-    vector<ProcInfo>::iterator ptr = procInfo.begin();
-    const std::string sattr = procAttr;
-    Search::eAttributeProc nattr;
+    vector<ProcInfo>::iterator it;
+    const std::string sattr = kind;
 
-    if (sattr == "PID") nattr=conv->PID;
-    else if (sattr == "PPID") nattr=conv->PPID;
-    else if (sattr == "STATE") nattr=conv->STATE;
-    else if (sattr == "COMM") nattr=conv->COMM;
-    else if (sattr == "START") nattr=conv->START;
-    else nattr = conv->NONE;
-
-    switch(nattr){
-        case Search::eAttributeProc::PID :{
-            const int pid = stoi(proc);
-            resultProc->push_back(cmd.GetProcInfoByPID(pid));
-            break;}
-        case Search::eAttributeProc::PPID :{
-            const int ppid = stoi(proc);
-            resultProc->push_back(cmd.GetProcInfoByPID(ppid));
-            break;}
-        case Search::eAttributeProc::STATE :{
-            for(ptr; ptr != procInfo.end(); ++ptr)
-            {
-                const char state = *proc.c_str();
-                const char procState = ptr->state;
-                if(state==procState) resultProc->push_back(*ptr);
-            }
-            break;}
-        case Search::eAttributeProc::COMM :{
-            for(ptr; ptr != procInfo.end(); ++ptr)
-            {
-                const std::string procName = proc;
-                const std::string procComm = ptr->comm;
-                if(procName==procComm) resultProc->push_back(*ptr);
-            }
-            break;}
-        case Search::eAttributeProc::START :{
-            for(ptr; ptr != procInfo.end(); ++ptr)
-            {
-                const std::string startTime = proc;
-                const std::string procTime = ptr->start;
-                if(startTime==procTime) resultProc->push_back(*ptr);
-            }
-            break;}
-        default :
-            return *resultProc;
+    if (sattr == "PID") {
+        const int pid = stoi(proc);
+        resultProc->push_back(GetProcInfoByPID(pid));
+    }
+    else if (sattr == "PPID") {
+        const int ppid = stoi(proc);
+        *resultProc = GetProcInfoByPPID(ppid);
+    }
+    else if (sattr == "STATE") {
+        for( it = procInfo.begin(); it != procInfo.end(); ++it ) {
+            const char state = proc.c_str()[0];
+            const char procState = it->state;
+            if( state == procState ) resultProc->push_back(*it);
+        }
+    }
+    else if (sattr == "COMM") {
+        for( it = procInfo.begin(); it != procInfo.end(); ++it ) {
+            const std::string procName = proc;
+            const std::string procComm = it->comm;
+            if(procName == procComm) resultProc->push_back(*it);
+        }
+    }
+    else if (sattr == "START") {
+        for( it = procInfo.begin(); it != procInfo.end(); ++it ) {
+            const std::string startTime = proc;
+            const std::string procTime = it->start;
+            if(startTime == procTime) resultProc->push_back(*it);
+        }
+    }
+    else {
     }
 
     return *resultProc;
+}
+
+string Command::GetProcPath(int pid)
+{
+    char buf[PATH_MAX];
+    ssize_t len;
+
+    stringstream ss;
+    ss << "/proc/" << pid << "/exe"; 
+
+    len = readlink(ss.str().c_str(), buf, sizeof(buf)-1);
+    if ( len == -1 ) {
+        // error
+    }
+    buf[len] = '\0';
+    return string(buf);
 }
