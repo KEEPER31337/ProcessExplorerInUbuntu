@@ -99,8 +99,8 @@ void CmdWindow::executeCommand(string &args)
                 executeVirusCheck();
             else if( cmd.compare("kill") == 0 )
                 executeKill();
-            //else if( cmd.compare("search") == 0 )
-                //executeSearch();
+            else if( cmd.compare("search") == 0 )
+                executeSearch();
             else if( cmd.compare("info") == 0 )
                 executeInfo();
 
@@ -129,7 +129,7 @@ void CmdWindow::executeInfo(void)
         printStr("not found pid");
     } 
     else {
-        printStr(procInfoToStr(information));
+        printStr(information.procInfoToStrWithName());
     }
 }
 
@@ -150,7 +150,16 @@ void CmdWindow::executePath(void)
 
 void CmdWindow::executeVirusCheck(void)
 {
-    
+    int pid;
+    char buf[1024];
+
+    if ( getNextArg(buf) == 0 ) {
+        printStr("wrong input");
+        return;
+    }
+    pid = stoi(buf);
+
+    printStr(mCmd->GetVirusTotalReport(pid));
 }
 
 
@@ -192,7 +201,7 @@ void CmdWindow::executeSearch(void)
     *procinfos = mCmd->SearchProc( mCmd->GetProcInfos(), kind, keyword );
 
     for( auto it = procinfos->begin(); it != procinfos->end(); ++it) {
-        printStr( procInfoToStr(*it) );
+        printStr( it->procInfoToStrWithName() );
     }
 }
 
@@ -202,28 +211,6 @@ void CmdWindow::executeHelp(void)
     vector<CommandEntry>::iterator it;
     for ( it=mCmdEntry->begin(); it != mCmdEntry->end(); it++ ) {
         printStr(it->help);
-    }
-}
-
-void CmdWindow::lineFeed(void)
-{
-    if (getcury(mWindow) == getmaxy(mWindow) - 1)
-        lineClear();
-    else
-        wmove(mWindow, getcury(mWindow) + 1, 0);
-}
-
-// require string new line (x == 0)
-void CmdWindow::printStr(string s)
-{
-    int curIdx = 0;
-
-    while ( curIdx < s.size() ) {
-
-        mvwaddnstr(mWindow, getcury(mWindow), 0, s.c_str()+curIdx, getmaxx(mWindow));
-
-        curIdx += getmaxx(mWindow);
-        lineFeed();
     }
 }
 
@@ -244,13 +231,6 @@ int CmdWindow::printArgs(string input)
     }
 
     return argCount;
-}
-
-void CmdWindow::lineClear(void)
-{
-    wmove(mWindow, 0, 0);
-    wdeleteln(mWindow);
-    wmove(mWindow, getmaxy(mWindow) - 1, 0);
 }
 
 void CmdWindow::initArgList(std::string args)
@@ -278,22 +258,4 @@ int CmdWindow::getNextArg(char *arg)
     arg[argLen] = '\0';
     arglist.curArgIdx += argLen + 1;
     return argLen;
-}
-
-string CmdWindow::procInfoToStr(ProcInfo &pi)
-{
-    stringstream ss;
-    ss << "PID : "      << pi.pid     << ", "
-       << "PPID : "     << pi.ppid    << ", "
-       << "COMMAND : "  << pi.comm    << ", "
-       << "CPU : "      << pi.cpu     << ", "
-       << "MEM : "      << pi.vmem    << ", "
-       << "STAT : "     << pi.state   << ", "
-       << "USER : "     << pi.user    << ", "
-       << "START : "    << pi.start   << ", "
-       << "THREADS : "  << pi.nlwp    << ", "
-       << "PNAME : "    << pi.name    << ", "
-       ;
-
-    return ss.str();
 }
