@@ -7,6 +7,8 @@
 #include "command.h"
 #include "processinfo.h"
 
+using namespace std;
+
 CmdWindow::CmdWindow(int endY, int endX, int begY, int begX)
     : Window(endY, endX, begY, begX)
     , mCmd(new Command())
@@ -22,10 +24,10 @@ CmdWindow::CmdWindow(int endY, int endX, int begY, int begX)
     mCmdEntry->push_back( CommandEntry("exit",        "exit program") );
 }
 
-void CmdWindow::StartShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
+void CmdWindow::StartShell(mutex &mutPrintScr, mutex &mutGetch)
 {
     int c;
-    std::string s;
+    string s;
     bool bPrevSpace = false;
     int psX;
     int psY;
@@ -269,7 +271,7 @@ int CmdWindow::printArgs(string input)
     return argCount;
 }
 
-void CmdWindow::initArgList(std::string args)
+void CmdWindow::initArgList(string args)
 {
     arglist.argBuffer = args;
     arglist.curArgIdx = 0;

@@ -241,13 +241,13 @@ vector<ProcInfo> *Command::GetProcInfoByPPID(int ppid)
     return result;
 }
 
-vector<ProcInfo> *Command::SearchProc(vector<ProcInfo> &procInfo, std::string kind, std::string proc)
+vector<ProcInfo> *Command::SearchProc(vector<ProcInfo> &procInfo, string kind, string proc)
 {
     vector<ProcInfo> *resultProc;    
     resultProc = new vector<ProcInfo>;
 
     vector<ProcInfo>::iterator it;
-    std::transform(kind.begin(), kind.end(),kind.begin(), ::toupper);
+    transform(kind.begin(), kind.end(),kind.begin(), ::toupper);
 
     if (kind == "PID") {
         const int pid = stoi(proc);
@@ -266,15 +266,15 @@ vector<ProcInfo> *Command::SearchProc(vector<ProcInfo> &procInfo, std::string ki
     }
     else if (kind == "COMM") {
         for( it = procInfo.begin(); it != procInfo.end(); ++it ) {
-            const std::string procName = proc;
-            const std::string procComm = it->comm;
+            const string procName = proc;
+            const string procComm = it->comm;
             if(procName == procComm) resultProc->push_back(*it);
         }
     }
     else if (kind == "START") {
         for( it = procInfo.begin(); it != procInfo.end(); ++it ) {
-            const std::string startTime = proc;
-            const std::string procTime = it->start;
+            const string startTime = proc;
+            const string procTime = it->start;
             if(startTime == procTime) resultProc->push_back(*it);
         }
     }
@@ -304,12 +304,12 @@ string Command::GetProcPath(int pid)
 // for virustotal
 string Command::GetVirusTotalReport(int pid)
 {
-    std::stringstream result;
-    std::string filepath;
+    stringstream result;
+    string filepath;
     Json::Value scanResult;
     Json::Value reportResult;
     Json::Value scanList;
-    std::string fileName;
+    string fileName;
     int detectedCnt = 0;
     int totalCnt    = 0;
 
@@ -330,9 +330,9 @@ string Command::GetVirusTotalReport(int pid)
     return result.str();
 }
 
-fileData &Command::getFileData(std::string &fileName)
+fileData &Command::getFileData(string &fileName)
 {
-    std::ifstream ifs(fileName, std::ifstream::binary);
+    ifstream ifs(fileName, ifstream::binary);
     fileData *filedata = new fileData();
     int length;
 
@@ -348,9 +348,9 @@ fileData &Command::getFileData(std::string &fileName)
     return *filedata;
 }
 
-std::string &Command::base64(fileData &filedata)
+string &Command::base64(fileData &filedata)
 {
-    std::string *s = new std::string();
+    string *s = new string();
     BIO *bmem, *b64;
     BUF_MEM *bptr;
 
@@ -367,7 +367,7 @@ std::string &Command::base64(fileData &filedata)
     return *s;
 }
 
-static size_t writeMemory(char *data, size_t size, size_t nmemb, std::string *s)
+static size_t writeMemory(char *data, size_t size, size_t nmemb, string *s)
 {
     if (data == NULL)
         return 0;
@@ -377,11 +377,11 @@ static size_t writeMemory(char *data, size_t size, size_t nmemb, std::string *s)
     return size * nmemb;
 }
 
-std::string &Command::makeScanPostFields(std::string &fileName)
+string &Command::makeScanPostFields(string &fileName)
 {
     fileData filedata = getFileData(fileName);
 
-    std::string *postFields = new std::string();
+    string *postFields = new string();
     *postFields = "apikey=";
     *postFields += APIKEY;
     *postFields += "&file=data:application/octet-stream;";
@@ -392,9 +392,9 @@ std::string &Command::makeScanPostFields(std::string &fileName)
     return *postFields;
 }
 
-std::string &Command::makeReportGetURL(std::string &resource)
+string &Command::makeReportGetURL(string &resource)
 {
-    std::string *url = new std::string();
+    string *url = new string();
 
     *url  = VIRUSTOTAL_URL;
     *url += "file/report";
@@ -407,59 +407,59 @@ std::string &Command::makeReportGetURL(std::string &resource)
     return *url;
 }
 
-std::string &Command::requestReport(std::string resource)
+string &Command::requestReport(string resource)
 {
     CURL *curl;
     CURLcode code;
-    std::string *s = new std::string();
+    string *s = new string();
 
     curl = curl_easy_init();
     if (curl == NULL)
     {
-        std::cerr << "curl init error" << std::endl;
+        cerr << "curl init error" << endl;
     }
     code = curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "GET");
     if (code != CURLE_OK)
-        std::cerr << "CustomRequest Error : " << curl_easy_strerror(code) << std::endl;
+        cerr << "CustomRequest Error : " << curl_easy_strerror(code) << endl;
 
     code = curl_easy_setopt(curl, CURLOPT_URL, makeReportGetURL(resource).c_str());
     if (code != CURLE_OK)
-        std::cerr << "URL Error : " << curl_easy_strerror(code) << std::endl;
+        cerr << "URL Error : " << curl_easy_strerror(code) << endl;
 
     code = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemory);
     if (code != CURLE_OK)
-        std::cerr << "WriteFunction Error : " << curl_easy_strerror(code) << std::endl;
+        cerr << "WriteFunction Error : " << curl_easy_strerror(code) << endl;
 
     code = curl_easy_setopt(curl, CURLOPT_WRITEDATA, s);
     if (code != CURLE_OK)
-        std::cerr << "WriteData Error : " << curl_easy_strerror(code) << std::endl;
+        cerr << "WriteData Error : " << curl_easy_strerror(code) << endl;
 
     code = curl_easy_perform(curl);
     if (code != CURLE_OK)
-        std::cerr << "curl_easy_perform Error : " << curl_easy_strerror(code) << std::endl;
+        cerr << "curl_easy_perform Error : " << curl_easy_strerror(code) << endl;
 
     curl_easy_cleanup(curl);
 
     return *s;
 }
 
-std::string &Command::requestScan(std::string &fileName)
+string &Command::requestScan(string &fileName)
 {
     CURL *curl;
     CURLcode code;
-    std::string *s = new std::string();
+    string *s = new string();
 
     curl = curl_easy_init();
     if( curl == NULL ) {
-        std::cerr << "curl init error" << std::endl;
+        cerr << "curl init error" << endl;
     }
     code = curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
     if ( code != CURLE_OK )
-        std::cerr << "CustomRequest Error : " << curl_easy_strerror(code) << std::endl;
+        cerr << "CustomRequest Error : " << curl_easy_strerror(code) << endl;
 
     code = curl_easy_setopt(curl, CURLOPT_URL, VIRUSTOTAL_SCAN_URL.c_str());
     if ( code != CURLE_OK )
-        std::cerr << "URL Error : " << curl_easy_strerror(code) << std::endl;
+        cerr << "URL Error : " << curl_easy_strerror(code) << endl;
     struct curl_slist *headers = NULL;
 
     headers = curl_slist_append(headers, "Accept: application/json");
@@ -467,36 +467,36 @@ std::string &Command::requestScan(std::string &fileName)
 
     code = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     if ( code != CURLE_OK )
-        std::cerr << "HttpHeader Error : " << curl_easy_strerror(code) << std::endl;
+        cerr << "HttpHeader Error : " << curl_easy_strerror(code) << endl;
 
     code = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, makeScanPostFields(fileName).c_str());
     if ( code != CURLE_OK )
-        std::cerr << "PostFields Error : " << curl_easy_strerror(code) << std::endl;
+        cerr << "PostFields Error : " << curl_easy_strerror(code) << endl;
 
     code = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemory);
     if ( code != CURLE_OK )
-        std::cerr << "WriteFunction Error : " << curl_easy_strerror(code) << std::endl;
+        cerr << "WriteFunction Error : " << curl_easy_strerror(code) << endl;
     
     code = curl_easy_setopt(curl, CURLOPT_WRITEDATA, s);
     if ( code != CURLE_OK )
-        std::cerr << "WriteData Error : " << curl_easy_strerror(code) << std::endl;
+        cerr << "WriteData Error : " << curl_easy_strerror(code) << endl;
 
     code = curl_easy_perform(curl);
     if ( code != CURLE_OK )
-        std::cerr << "curl_easy_perform Error : " << curl_easy_strerror(code) << std::endl;
+        cerr << "curl_easy_perform Error : " << curl_easy_strerror(code) << endl;
 
     curl_easy_cleanup(curl);
 
     return *s;
 }
 
-Json::Value &Command::parsingJson(std::string &data)
+Json::Value &Command::parsingJson(string &data)
 {
     Json::Value *rootr = new Json::Value();
     Json::Reader reader;
 
     if ( !reader.parse(data, *rootr) ) {
-        std::cerr << "json parse error" << std::endl;
+        cerr << "json parse error" << endl;
     }
 
     return *rootr;
