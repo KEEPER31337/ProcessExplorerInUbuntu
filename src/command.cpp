@@ -13,6 +13,7 @@
 #include <signal.h>
 #include <sstream>
 #include <limits.h>
+#include <algorithm>
 
 // virustotal
 #include <iomanip>
@@ -225,7 +226,7 @@ ProcInfo Command::GetProcInfoByPID(int pid)
         selecProc.pid = -1;
     return selecProc;
 }
-vector<ProcInfo> &Command::GetProcInfoByPPID(int ppid)
+vector<ProcInfo> *Command::GetProcInfoByPPID(int ppid)
 {
     vector<ProcInfo> *result;
     result = new vector<ProcInfo>;
@@ -237,40 +238,40 @@ vector<ProcInfo> &Command::GetProcInfoByPPID(int ppid)
         }
     }
 
-    return *result;
+    return result;
 }
 
-vector<ProcInfo> &Command::SearchProc(vector<ProcInfo> &procInfo, std::string kind, std::string proc)
+vector<ProcInfo> *Command::SearchProc(vector<ProcInfo> &procInfo, std::string kind, std::string proc)
 {
     vector<ProcInfo> *resultProc;    
     resultProc = new vector<ProcInfo>;
 
     vector<ProcInfo>::iterator it;
-    const std::string sattr = kind;
+    std::transform(kind.begin(), kind.end(),kind.begin(), ::toupper);
 
-    if (sattr == "PID") {
+    if (kind == "PID") {
         const int pid = stoi(proc);
         resultProc->push_back(GetProcInfoByPID(pid));
     }
-    else if (sattr == "PPID") {
+    else if (kind == "PPID") {
         const int ppid = stoi(proc);
-        *resultProc = GetProcInfoByPPID(ppid);
+        resultProc = GetProcInfoByPPID(ppid);
     }
-    else if (sattr == "STATE") {
+    else if (kind == "STATE") {
         for( it = procInfo.begin(); it != procInfo.end(); ++it ) {
             const char state = proc.c_str()[0];
             const char procState = it->state;
             if( state == procState ) resultProc->push_back(*it);
         }
     }
-    else if (sattr == "COMM") {
+    else if (kind == "COMM") {
         for( it = procInfo.begin(); it != procInfo.end(); ++it ) {
             const std::string procName = proc;
             const std::string procComm = it->comm;
             if(procName == procComm) resultProc->push_back(*it);
         }
     }
-    else if (sattr == "START") {
+    else if (kind == "START") {
         for( it = procInfo.begin(); it != procInfo.end(); ++it ) {
             const std::string startTime = proc;
             const std::string procTime = it->start;
@@ -278,9 +279,10 @@ vector<ProcInfo> &Command::SearchProc(vector<ProcInfo> &procInfo, std::string ki
         }
     }
     else {
+        return NULL;
     }
 
-    return *resultProc;
+    return resultProc;
 }
 
 string Command::GetProcPath(int pid)

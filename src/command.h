@@ -36,9 +36,9 @@ public:
     // shell command functions
     string GetHelp(string cmdFunc);
     ProcInfo GetProcInfoByPID(int pid);
-    vector<ProcInfo> &GetProcInfoByPPID(int ppid);
+    vector<ProcInfo> *GetProcInfoByPPID(int ppid);
     void SendSignal(int pid, int signalNum);
-    vector<ProcInfo> &SearchProc(vector<ProcInfo> &procInfo, string procAttr, string proc);
+    vector<ProcInfo> *SearchProc(vector<ProcInfo> &procInfo, string procAttr, string proc);
     string GetProcPath(int pid);
     string GetVirusTotalReport(int pid);
 

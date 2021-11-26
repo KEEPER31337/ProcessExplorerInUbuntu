@@ -19,6 +19,7 @@ CmdWindow::CmdWindow(int endY, int endX, int begY, int begX)
     mCmdEntry->push_back( CommandEntry("kill",        "kill [PID] [SGINAL_NUM] - send a signal to process") );
     mCmdEntry->push_back( CommandEntry("search",      "search [PID] [KEYWORD] - search the processes using keyword") );
     mCmdEntry->push_back( CommandEntry("help",        "print help") );
+    mCmdEntry->push_back( CommandEntry("exit",        "exit program") );
 }
 
 void CmdWindow::StartShell(std::mutex &mutPrintScr, std::mutex &mutGetch)
@@ -130,6 +131,8 @@ void CmdWindow::executeCommand(string &args)
                 executeSearch();
             else if( cmd.compare("info") == 0 )
                 executeInfo();
+            else if( cmd.compare("exit") == 0 )
+                system("kill -9 `pidof ./main`");
 
             break;
 
@@ -216,16 +219,22 @@ void CmdWindow::executeSearch(void)
     string keyword;
     vector<ProcInfo> *procinfos;
     if ( getNextArg(buf) == 0 ) {
-        printStr("!need kind!");
+        printStr("usage: search \"PID\"/\"PPID\"/\"STATE\"/\"COMM\"/\"START\" [keyword]");
         return;
     }
     kind = buf;
     if ( getNextArg(buf) == 0 ) {
-        printStr("!need keyword!");
+        printStr("usage: search \"PID\"/\"PPID\"/\"STATE\"/\"COMM\"/\"START\" [keyword]");
         return;
     }
     keyword = buf;
-    *procinfos = mCmd->SearchProc( mCmd->GetProcInfos(), kind, keyword );
+    procinfos = mCmd->SearchProc( mCmd->GetProcInfos(), kind, keyword );
+
+    if( procinfos == NULL ) {
+        // handle error
+        printStr("usage: search \"PID\"/\"PPID\"/\"STATE\"/\"COMM\"/\"START\" [keyword]");
+        return;
+    }
 
     for( auto it = procinfos->begin(); it != procinfos->end(); ++it) {
         printStr( it->procInfoToStrWithName() );
