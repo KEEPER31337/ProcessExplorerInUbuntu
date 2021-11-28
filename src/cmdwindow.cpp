@@ -207,14 +207,34 @@ void CmdWindow::executeVirusCheck(void)
 {
     int pid;
     string *arg;
+    string filepath;
 
     if ( ( arg = getNextArg() ) == NULL ) {
         printStr("wrong input");
         return;
     }
-    pid = stoi(*arg);
+    for ( int i=0; i<arg->size(); i++ ) {
+        if( !isdigit(arg->at(i)) ) {
+            printStr("wrong parameter : must be pid");
+            return;
+        }
+    }
+    if( arg->size() > 8 ) {
+        pid = -1;
+    }
+    else {
+        pid = stoi(*arg);
+    }
+    filepath = mCmd->GetProcPath(pid);
+    if( filepath.compare("cannot get path") == 0 ) {
+        printStr(filepath);
+        return;
+    }
+    else {
+        printStr(string("file path : ")+filepath);
+    }
 
-    printStr(mCmd->GetVirusTotalReport(pid));
+    printStr(mCmd->GetVirusTotalReport(filepath));
 }
 
 
