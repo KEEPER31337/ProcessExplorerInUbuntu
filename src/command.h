@@ -41,7 +41,7 @@ public:
     void SendSignal(int pid, int signalNum);
     vector<ProcInfo> *SearchProc(vector<ProcInfo> &procInfo, string procAttr, string proc);
     string GetProcPath(int pid);
-    string GetVirusTotalReport(int pid);
+    string GetVirusTotalReport(string filepath);
 
 private:
     void    sortProcInfos(bool(*cmpFunc)(ProcInfo&, ProcInfo&));

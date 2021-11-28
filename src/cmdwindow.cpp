@@ -19,9 +19,9 @@ CmdWindow::CmdWindow(int endY, int endX, int begY, int begX, Command *cmd)
     mCmdEntry->push_back( CommandEntry("path",        "path [PID] - display the path of each process") );
     mCmdEntry->push_back( CommandEntry("viruscheck",  "viruscheck [PID] - check a status which process is infection") );
     mCmdEntry->push_back( CommandEntry("kill",        "kill [PID] [SGINAL_NUM] - send a signal to process") );
-    mCmdEntry->push_back( CommandEntry("search",      "search [PID] [KEYWORD] - search the processes using keyword") );
-    mCmdEntry->push_back( CommandEntry("help",        "print help") );
-    mCmdEntry->push_back( CommandEntry("exit",        "exit program") );
+    mCmdEntry->push_back( CommandEntry("search",      "search [kind] [KEYWORD] - search the processes using keyword") );
+    mCmdEntry->push_back( CommandEntry("help",        "help - print help") );
+    mCmdEntry->push_back( CommandEntry("exit",        "exit - exit program") );
 }
 
 void CmdWindow::StartShell(mutex &mutPrintScr, mutex &mutGetch)
@@ -112,30 +112,30 @@ void CmdWindow::executeCommand(string &args)
 {
     initArgList(args.c_str());
     int argCount = 0;
-    string cmd;
+    string *cmd;
     vector<CommandEntry>::iterator it;
     lineFeed();
-    if ( ( cmd = getNextArg() ).size() == 0 ) {
+    if ( ( cmd = getNextArg() ) == NULL ) {
         printStr( string("wrong input : ")+args );
         return;
     }
 
     for ( it=mCmdEntry->begin(); it != mCmdEntry->end(); it++ ) {
-        if( cmd.compare(it->cmd) == 0 ) {
+        if( cmd->compare(it->cmd) == 0 ) {
 
-            if( cmd.compare("help") == 0 )
+            if( cmd->compare("help") == 0 )
                 executeHelp();
-            else if( cmd.compare("path") == 0 )
+            else if( cmd->compare("path") == 0 )
                 executePath();
-            else if( cmd.compare("viruscheck") == 0 )
+            else if( cmd->compare("viruscheck") == 0 )
                 executeVirusCheck();
-            else if( cmd.compare("kill") == 0 )
+            else if( cmd->compare("kill") == 0 )
                 executeKill();
-            else if( cmd.compare("search") == 0 )
+            else if( cmd->compare("search") == 0 )
                 executeSearch();
-            else if( cmd.compare("info") == 0 )
+            else if( cmd->compare("info") == 0 )
                 executeInfo();
-            else if( cmd.compare("exit") == 0 )
+            else if( cmd->compare("exit") == 0 )
                 mCmd->SetMode(Command::Mode::EXIT);
 
             break;
@@ -149,24 +149,24 @@ void CmdWindow::executeCommand(string &args)
 void CmdWindow::executeInfo(void)
 {
     int pid;
-    string arg;
+    string *arg;
     stringstream ss;
     ProcInfo information;
 
-    if ( ( arg = getNextArg() ).size() == 0 ) {
-        printStr("wrong input");
+    if ( ( arg = getNextArg() ) == NULL ) {
+        printStr("wrong input : need parameter");
         return;
     }
-    for ( int i=0; i<arg.size(); i++ ) {
-        if( !isdigit(arg[i]) ) {
+    for ( int i=0; i<arg->size(); i++ ) {
+        if( !isdigit(arg->at(i)) ) {
             printStr("wrong parameter : must be pid");
             return;
         }
     }
-    if( arg.size() > 8 )
+    if( arg->size() > 8 )
         information.pid = -1;
     else {
-        pid = stoi(arg);
+        pid = stoi(*arg);
         information = mCmd->GetProcInfoByPID(pid);
     }
     
@@ -181,70 +181,124 @@ void CmdWindow::executeInfo(void)
 void CmdWindow::executePath(void)
 {
     int pid;
-    string arg;
+    string *arg;
 
-    if ( ( arg = getNextArg() ).size() == 0 ) {
-        printStr("wrong input");
+    if ( ( arg = getNextArg() ) == NULL ) {
+        printStr("wrong input : need parameter");
         return;
     }
-    pid = stoi(arg);
+    for ( int i=0; i<arg->size(); i++ ) {
+        if( !isdigit(arg->at(i)) ) {
+            printStr("wrong parameter : must be pid");
+            return;
+        }
+    }
+    if( arg->size() > 8 ) {
+        pid = -1;
+    }
+    else {
+        pid = stoi(*arg);
+    }
 
     printStr(mCmd->GetProcPath(pid));
-
 }
 
 void CmdWindow::executeVirusCheck(void)
 {
     int pid;
-    string arg;
+    string *arg;
+    string filepath;
 
-    if ( ( arg = getNextArg() ).size() == 0 ) {
-        printStr("wrong input");
+    if ( ( arg = getNextArg() ) == NULL ) {
+        printStr("wrong input : need parameter");
         return;
     }
-    pid = stoi(arg);
+    for ( int i=0; i<arg->size(); i++ ) {
+        if( !isdigit(arg->at(i)) ) {
+            printStr("wrong parameter : must be pid");
+            return;
+        }
+    }
+    if( arg->size() > 8 ) {
+        pid = -1;
+    }
+    else {
+        pid = stoi(*arg);
+    }
+    filepath = mCmd->GetProcPath(pid);
+    if( filepath.compare("cannot get path") == 0 ) {
+        printStr(filepath);
+        return;
+    }
+    else {
+        printStr(string("file path : ")+filepath);
+    }
 
-    printStr(mCmd->GetVirusTotalReport(pid));
+    printStr(mCmd->GetVirusTotalReport(filepath));
 }
 
 
 void CmdWindow::executeKill(void)
 {
     int pid, sigNum;
-    string arg;
+    string *arg;
 
-    if ( ( arg = getNextArg() ).size() == 0 ) {
-        printStr("wrong input");
+    if ( ( arg = getNextArg() ) == NULL ) {
+        printStr("wrong input : need parameter");
         return;
     }
-    pid = stoi(arg);
-
-    if ( ( arg = getNextArg() ).size() == 0 ) {
-        printStr("wrong input");
+    for ( int i=0; i<arg->size(); i++ ) {
+        if( !isdigit(arg->at(i)) ) {
+            printStr("wrong parameter : must be pid");
+            return;
+        }
+    }
+    if( arg->size() > 8 ) {
+        printStr("wrong pid");
         return;
     }
-    sigNum = stoi(arg);
+    else {
+        pid = stoi(*arg);
+    }
+
+    if ( ( arg = getNextArg() ) == NULL ) {
+        printStr("wrong input : need parameter");
+        return;
+    }
+    for ( int i=0; i<arg->size(); i++ ) {
+        if( !isdigit(arg->at(i)) ) {
+            printStr("wrong parameter : must be sigNum");
+            return;
+        }
+    }
+    if( arg->size() > 8 ) {
+        printStr("wrong signal");
+        return;
+    }
+    else {
+        sigNum = stoi(*arg);
+    }
 
     mCmd->SendSignal(pid, sigNum);
 }
 
 void CmdWindow::executeSearch(void)
 {
-    string arg;
+    string *arg;
     string kind;
     string keyword;
     vector<ProcInfo> *procinfos;
 
-    if ( ( arg = getNextArg() ).size() == 0 ) {
+    if ( ( arg = getNextArg() ) == NULL ) {
         printStr("usage: search \"PID\"/\"PPID\"/\"STATE\"/\"COMM\"/\"START\" [keyword]");
         return;
     }
-    kind = arg;
-    if ( ( arg = getNextArg() ).size() == 0 ) {
+    kind = *arg;
+    if ( ( arg = getNextArg() ) == NULL ) {
         printStr("usage: search \"PID\"/\"PPID\"/\"STATE\"/\"COMM\"/\"START\" [keyword]");
         return;
     }
-    keyword = arg;
+    keyword = *arg;
     procinfos = mCmd->SearchProc( mCmd->GetProcInfos(), kind, keyword );
 
     if( procinfos == NULL ) {
@@ -270,11 +324,11 @@ void CmdWindow::executeHelp(void)
 int CmdWindow::printArgs(string input)
 {
     initArgList(input.c_str());
-    string arg;
+    string *arg;
     int argCount = 0;
 
     lineFeed();
-    while ( ( arg = getNextArg() ).size() == 0 )
+    while ( ( arg = getNextArg() ) == NULL )
     {
         stringstream ss;
         ss << "arg " << argCount
@@ -293,24 +347,27 @@ void CmdWindow::initArgList(string args)
     arglist.curArgc = 0;
 }
 
-string CmdWindow::getNextArg(void)
+string *CmdWindow::getNextArg(void)
 {
-    char *arg;
+    string *res;
     int argLen, i;
     if (arglist.argBuffer.size() <= arglist.curArgIdx)
         return 0;
 
-    for (i = arglist.curArgIdx; i < arglist.argBuffer.size(); i++)
-    {
-        if (arglist.argBuffer[i] == ' ')
-        {
+    for ( i = arglist.curArgIdx; i < arglist.argBuffer.size(); i++ ) {
+        if ( arglist.argBuffer[i] == ' ' ) {
             break;
         }
     }
-    argLen = i - arglist.curArgIdx;
-    arg = (char *)malloc(argLen+1);
-    memcpy(arg, arglist.argBuffer.c_str() + arglist.curArgIdx, argLen);
-    arg[argLen] = '\0';
-    arglist.curArgIdx += argLen + 1;
-    return string(arg);
+
+    if( argLen < 1 ) {
+        return NULL;
+    }
+    else { 
+        res = new string(arglist.argBuffer.substr(arglist.curArgIdx, i-arglist.curArgIdx));
+    }
+
+    arglist.curArgIdx += i - arglist.curArgIdx + 1;
+
+    return res;
 }
