@@ -13,7 +13,6 @@ thread *cmdWinThread;
 InfoWindow *infoWindow;
 CmdWindow *cmdWindow;
 Command *cmd;
-char buf[1024];
 
 mutex *mutPrintScr;
 mutex *mutGetch;
@@ -69,8 +68,6 @@ void CmdWindowThreadFunc(void)
 void EndWindow(void)
 {
     endwin();
-    infoWindow->PrintSize();
-    cmdWindow->PrintSize();
 }
 
 void Working(void)
