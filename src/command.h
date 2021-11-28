@@ -1,5 +1,4 @@
 #include "processinfo.h"
-#include "sysinfo.h"
 #include "json/json.h"
 
 #pragma once
@@ -61,7 +60,6 @@ private:
     string &requestScan(string &fileName);
     Json::Value &parsingJson(string &data);
 
-    SysInfo *mSysInfo;
     vector<ProcInfo> *mProcInfos;
     Mode mMode;
 };
