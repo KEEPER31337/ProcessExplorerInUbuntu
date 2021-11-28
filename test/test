@@ -1,0 +1,144 @@
+#include <iostream>
+#include <fstream>
+#include <unistd.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <string>
+#include <vector>
+#include <sstream>
+
+using namespace std;
+
+typedef unsigned long UL;
+typedef unsigned long long ULL;
+
+struct ProcInfo
+{
+    string procInfoToStrWithName(void)
+    {
+        stringstream ss;
+        ss << "PID : " << pid << ", "
+           << "PPID : " << ppid << ", "
+           << "utime : " << utime << ", "
+           << "stime : " << stime << ", "
+           << "MEM : " << vmem << ", "
+           << "STAT : " << state << ", "
+           << "USER : " << user << ", "
+           << "START : " << start << ", "
+           << "THREADS : " << threads << ", "
+           << "COMMAND : " << comm << ", "
+            //<< "PNAME : "    << name    << ", "
+            ;
+
+        return ss.str();
+    }
+
+    int pid;     // process id
+    int ppid;    // parent process id
+    string comm; // command
+    UL utime;    //
+    UL stime;
+    ULL vmem;     // 메모리 점유율
+    char state;   // state
+    string user;  // 프로세스 사용 유저명
+    string start; // 프로세스 시작 시간
+    int uid;
+    int euid;
+    int threads; // # of threads (number of light weight process)
+};
+
+vector<ProcInfo> p;
+
+void update(void)
+{
+    DIR *dp;
+    struct dirent *direntry;
+    struct stat statbuf;
+    ifstream ifs;
+
+    if ((dp = opendir("/proc")) == NULL)
+    {
+        cerr << "cannot open /proc dir" << endl;
+    }
+    chdir("/proc");
+
+    while ((direntry = readdir(dp)) != NULL)
+    {
+        string procdir = direntry->d_name;
+        ProcInfo ps;
+        string s;
+        vector<string> t;
+
+        if (lstat(direntry->d_name, &statbuf) == -1)
+        {
+            cerr << "lstat error : " << direntry->d_name << endl;
+            continue;
+        }
+
+        if (S_ISDIR(statbuf.st_mode) && isdigit(direntry->d_name[0]))
+        {
+            ifs.open(direntry->d_name + string("/stat"));
+            if (!ifs.is_open())
+            {
+                cerr << "stat open error" << endl;
+                continue;
+            }
+            for (int i = 0; i < 40; i++)
+            {
+                ifs >> s;
+                t.push_back(s);
+            }
+
+            ps.pid = stoi(t[0]);
+            ps.state = t[2][0];
+            ps.ppid = stoi(t[3]);
+            ps.utime = stoul(t[13]);
+            ps.stime = stoul(t[14]);
+            ps.start = stoul(t[21]);
+            ps.vmem = stoull(t[22]) / 1024;
+
+            ifs.close();
+
+            ifs.open(direntry->d_name + string("/status"));
+            if (!ifs.is_open())
+            {
+                cerr << "status open error" << endl;
+                continue;
+            }
+            for (int i = 0; i < 40; i++)
+            {
+                ifs >> s;
+                if (s.compare("Name:"))
+                {
+                    ifs >> ps.comm;
+                }
+                if (s.compare("Uid:"))
+                {
+                    ifs >> ps.uid;
+                    ifs >> ps.euid;
+                    ps.user =
+                }
+                if (s.compare("Threads:"))
+                {
+                    ifs >> ps.threads;
+                }
+            }
+            ifs.close();
+
+            p.push_back(ps);
+        }
+    }
+    if (closedir(dp) == -1)
+    {
+        cerr << "dir close error" << endl;
+    }
+}
+
+int main(void)
+{
+    update();
+    for (int i = 0; i < p.size(); i++)
+    {
+    }
+    return 0;
+}
