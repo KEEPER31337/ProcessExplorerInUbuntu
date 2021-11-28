@@ -34,7 +34,7 @@ void CmdWindow::StartShell(mutex &mutPrintScr, mutex &mutGetch)
     
     curs_set(2);
     keypad(mWindow, true);
-    nodelay(mWindow, true);
+    halfdelay(1);
     
     mvwprintw(mWindow, 0, 0, "> ");
     psY = getcury(mWindow);
