@@ -295,22 +295,23 @@ void CmdWindow::initArgList(string args)
 
 string CmdWindow::getNextArg(void)
 {
-    char *arg;
+    string res;
     int argLen, i;
     if (arglist.argBuffer.size() <= arglist.curArgIdx)
         return 0;
 
-    for (i = arglist.curArgIdx; i < arglist.argBuffer.size(); i++)
-    {
-        if (arglist.argBuffer[i] == ' ')
-        {
+    for ( i = arglist.curArgIdx; i < arglist.argBuffer.size(); i++ ) {
+        if ( arglist.argBuffer[i] == ' ' ) {
             break;
         }
     }
-    argLen = i - arglist.curArgIdx;
-    arg = (char *)malloc(argLen+1);
-    memcpy(arg, arglist.argBuffer.c_str() + arglist.curArgIdx, argLen);
-    arg[argLen] = '\0';
-    arglist.curArgIdx += argLen + 1;
-    return string(arg);
+
+    if( argLen < 1 ) {
+        return res;
+    }
+    else { 
+        res = arglist.argBuffer.substr(arglist.curArgIdx, i-arglist.curArgIdx);
+    }
+    
+    return res;
 }
