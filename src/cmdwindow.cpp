@@ -66,10 +66,12 @@ void CmdWindow::StartShell(mutex &mutPrintScr, mutex &mutGetch)
 
         case '\n':
             mCmd->UpdateProcStat();
+            mutGetch.lock();
             executeCommand(s);
             wprintw(mWindow, "> ");
             psY = getcury(mWindow);
             psX = 2;
+            mutPrintScr.unlock();
             s.clear();
             bPrevSpace = false;
             break;
@@ -109,16 +111,14 @@ void CmdWindow::StartShell(mutex &mutPrintScr, mutex &mutGetch)
 void CmdWindow::executeCommand(string &args)
 {
     initArgList(args.c_str());
-    char buf[1024];
     int argCount = 0;
     string cmd;
     vector<CommandEntry>::iterator it;
     lineFeed();
-    if ( getNextArg(buf) == 0 ) {
+    if ( ( cmd = getNextArg() ).size() == 0 ) {
         printStr( string("wrong input : ")+args );
         return;
     }
-    cmd = buf;
 
     for ( it=mCmdEntry->begin(); it != mCmdEntry->end(); it++ ) {
         if( cmd.compare(it->cmd) == 0 ) {
@@ -149,16 +149,27 @@ void CmdWindow::executeCommand(string &args)
 void CmdWindow::executeInfo(void)
 {
     int pid;
-    char buf[1024];
+    string arg;
     stringstream ss;
+    ProcInfo information;
 
-    if ( getNextArg(buf) == 0 ) {
+    if ( ( arg = getNextArg() ).size() == 0 ) {
         printStr("wrong input");
         return;
     }
-    pid = stoi(buf);
-
-    ProcInfo information = mCmd->GetProcInfoByPID(pid);
+    for ( int i=0; i<arg.size(); i++ ) {
+        if( !isdigit(arg[i]) ) {
+            printStr("wrong parameter : must be pid");
+            return;
+        }
+    }
+    if( arg.size() > 8 )
+        information.pid = -1;
+    else {
+        pid = stoi(arg);
+        information = mCmd->GetProcInfoByPID(pid);
+    }
+    
     if( information.pid == -1 ) {
         printStr("not found pid");
     } 
@@ -170,13 +181,13 @@ void CmdWindow::executeInfo(void)
 void CmdWindow::executePath(void)
 {
     int pid;
-    char buf[1024];
+    string arg;
 
-    if ( getNextArg(buf) == 0 ) {
+    if ( ( arg = getNextArg() ).size() == 0 ) {
         printStr("wrong input");
         return;
     }
-    pid = stoi(buf);
+    pid = stoi(arg);
 
     printStr(mCmd->GetProcPath(pid));
 
@@ -185,13 +196,13 @@ void CmdWindow::executePath(void)
 void CmdWindow::executeVirusCheck(void)
 {
     int pid;
-    char buf[1024];
+    string arg;
 
-    if ( getNextArg(buf) == 0 ) {
+    if ( ( arg = getNextArg() ).size() == 0 ) {
         printStr("wrong input");
         return;
     }
-    pid = stoi(buf);
+    pid = stoi(arg);
 
     printStr(mCmd->GetVirusTotalReport(pid));
 }
@@ -200,38 +211,40 @@ void CmdWindow::executeVirusCheck(void)
 void CmdWindow::executeKill(void)
 {
     int pid, sigNum;
-    char buf[1024];
-    if ( getNextArg(buf) == 0 ) {
-        printStr("wrong input");
-        return;
-    }
-    pid = stoi(buf);
+    string arg;
 
-    if ( getNextArg(buf) == 0 ) {
+    if ( ( arg = getNextArg() ).size() == 0 ) {
         printStr("wrong input");
         return;
     }
-    sigNum = stoi(buf);
+    pid = stoi(arg);
+
+    if ( ( arg = getNextArg() ).size() == 0 ) {
+        printStr("wrong input");
+        return;
+    }
+    sigNum = stoi(arg);
 
     mCmd->SendSignal(pid, sigNum);
 }
 
 void CmdWindow::executeSearch(void)
 {
-    char buf[1024];
+    string arg;
     string kind;
     string keyword;
     vector<ProcInfo> *procinfos;
-    if ( getNextArg(buf) == 0 ) {
+
+    if ( ( arg = getNextArg() ).size() == 0 ) {
         printStr("usage: search \"PID\"/\"PPID\"/\"STATE\"/\"COMM\"/\"START\" [keyword]");
         return;
     }
-    kind = buf;
-    if ( getNextArg(buf) == 0 ) {
+    kind = arg;
+    if ( ( arg = getNextArg() ).size() == 0 ) {
         printStr("usage: search \"PID\"/\"PPID\"/\"STATE\"/\"COMM\"/\"START\" [keyword]");
         return;
     }
-    keyword = buf;
+    keyword = arg;
     procinfos = mCmd->SearchProc( mCmd->GetProcInfos(), kind, keyword );
 
     if( procinfos == NULL ) {
@@ -257,15 +270,15 @@ void CmdWindow::executeHelp(void)
 int CmdWindow::printArgs(string input)
 {
     initArgList(input.c_str());
-    char buf[1024];
+    string arg;
     int argCount = 0;
 
     lineFeed();
-    while (getNextArg(buf) != 0)
+    while ( ( arg = getNextArg() ).size() == 0 )
     {
         stringstream ss;
         ss << "arg " << argCount
-           << ": " << buf; 
+           << ": " << arg; 
         printStr(ss.str());
         argCount++;
     }
@@ -280,8 +293,9 @@ void CmdWindow::initArgList(string args)
     arglist.curArgc = 0;
 }
 
-int CmdWindow::getNextArg(char *arg)
+string CmdWindow::getNextArg(void)
 {
+    char *arg;
     int argLen, i;
     if (arglist.argBuffer.size() <= arglist.curArgIdx)
         return 0;
@@ -294,8 +308,9 @@ int CmdWindow::getNextArg(char *arg)
         }
     }
     argLen = i - arglist.curArgIdx;
+    arg = (char *)malloc(argLen+1);
     memcpy(arg, arglist.argBuffer.c_str() + arglist.curArgIdx, argLen);
     arg[argLen] = '\0';
     arglist.curArgIdx += argLen + 1;
-    return argLen;
+    return string(arg);
 }
