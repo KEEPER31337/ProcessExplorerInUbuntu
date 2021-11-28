@@ -297,10 +297,9 @@ bool compareByCPU(ProcInfo &p1, ProcInfo &p2)
 ///////////////////////////
 // for virustotal
 ///////////////////////////
-string Command::GetVirusTotalReport(int pid)
+string Command::GetVirusTotalReport(string filepath)
 {
     stringstream result;
-    string filepath;
     Json::Value scanResult;
     Json::Value reportResult;
     Json::Value scanList;
@@ -308,7 +307,6 @@ string Command::GetVirusTotalReport(int pid)
     int detectedCnt = 0;
     int totalCnt    = 0;
 
-    filepath = GetProcPath(pid);
     scanResult = parsingJson( requestScan(filepath) );
     scanList = parsingJson( requestReport(scanResult["resource"].asCString()) )["scans"];
     totalCnt = scanList.size();
