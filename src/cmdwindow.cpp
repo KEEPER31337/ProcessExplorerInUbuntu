@@ -19,9 +19,9 @@ CmdWindow::CmdWindow(int endY, int endX, int begY, int begX, Command *cmd)
     mCmdEntry->push_back( CommandEntry("path",        "path [PID] - display the path of each process") );
     mCmdEntry->push_back( CommandEntry("viruscheck",  "viruscheck [PID] - check a status which process is infection") );
     mCmdEntry->push_back( CommandEntry("kill",        "kill [PID] [SGINAL_NUM] - send a signal to process") );
-    mCmdEntry->push_back( CommandEntry("search",      "search [PID] [KEYWORD] - search the processes using keyword") );
-    mCmdEntry->push_back( CommandEntry("help",        "print help") );
-    mCmdEntry->push_back( CommandEntry("exit",        "exit program") );
+    mCmdEntry->push_back( CommandEntry("search",      "search [kind] [KEYWORD] - search the processes using keyword") );
+    mCmdEntry->push_back( CommandEntry("help",        "help - print help") );
+    mCmdEntry->push_back( CommandEntry("exit",        "exit - exit program") );
 }
 
 void CmdWindow::StartShell(mutex &mutPrintScr, mutex &mutGetch)
@@ -210,7 +210,7 @@ void CmdWindow::executeVirusCheck(void)
     string filepath;
 
     if ( ( arg = getNextArg() ) == NULL ) {
-        printStr("wrong input");
+        printStr("wrong input : need parameter");
         return;
     }
     for ( int i=0; i<arg->size(); i++ ) {
@@ -244,16 +244,40 @@ void CmdWindow::executeKill(void)
     string *arg;
 
     if ( ( arg = getNextArg() ) == NULL ) {
-        printStr("wrong input");
+        printStr("wrong input : need parameter");
         return;
     }
-    pid = stoi(*arg);
+    for ( int i=0; i<arg->size(); i++ ) {
+        if( !isdigit(arg->at(i)) ) {
+            printStr("wrong parameter : must be pid");
+            return;
+        }
+    }
+    if( arg->size() > 8 ) {
+        printStr("wrong pid");
+        return;
+    }
+    else {
+        pid = stoi(*arg);
+    }
 
     if ( ( arg = getNextArg() ) == NULL ) {
-        printStr("wrong input");
+        printStr("wrong input : need parameter");
         return;
     }
-    sigNum = stoi(*arg);
+    for ( int i=0; i<arg->size(); i++ ) {
+        if( !isdigit(arg->at(i)) ) {
+            printStr("wrong parameter : must be sigNum");
+            return;
+        }
+    }
+    if( arg->size() > 8 ) {
+        printStr("wrong signal");
+        return;
+    }
+    else {
+        sigNum = stoi(*arg);
+    }
 
     mCmd->SendSignal(pid, sigNum);
 }
