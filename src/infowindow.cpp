@@ -23,9 +23,9 @@ void InfoWindow::PrintTitle(void)
        << setw(8)  << "PPID" 
        << setw(8)  << "CPU"
        << setw(12) << "MEM"
-       << setw(5)  << "STAT"
+       << setw(8)  << "STAT"
        << setw(8)  << "USER"
-       << setw(8)  << "START"
+       << setw(10) << "RUNTIME"
        << setw(8)  << "TH"
        << setw(20) << "COMM"
        //<< setw(20)  << "NAME"
@@ -39,7 +39,7 @@ void InfoWindow::PrintTitle(void)
 void InfoWindow::PrintProcInfo(vector<ProcInfo> &procInfo)
 {
     curs_set(0);
-    for ( int i = 0; i < getmaxy(mWindow)-3; i++ ) {
+    for ( int i = 0; i < getmaxy(mWindow); i++ ) {
         if ( i < procInfo.size() ) {
             mvPrintLine(i+1, 0, procInfo[i].procInfoToStr());
         }

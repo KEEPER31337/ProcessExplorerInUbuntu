@@ -60,5 +60,14 @@ void Window::printStr(string s)
 
 void Window::mvPrintLine(int y, int x, string s)
 {
-    mvwaddnstr(mWindow, y, x, s.c_str(), getmaxx(mWindow));
+    if ( s.size() == 0 ) {
+        for(int i=0; i<getmaxx(mWindow); i++) {
+            s.push_back(' ');
+        }
+        mvwaddnstr(mWindow, y, x, s.c_str(), getmaxx(mWindow));
+    }
+    else {
+        mvwaddnstr(mWindow, y, x, s.c_str(), getmaxx(mWindow));
+    }
+    
 }

@@ -1,11 +1,11 @@
 #include "processinfo.h"
-#include "sysinfo.h"
 #include "json/json.h"
 
 #pragma once
 
 using namespace std;
 
+typedef unsigned long      UL;
 typedef unsigned long long ULL;
 
 typedef struct fileData {
@@ -44,12 +44,11 @@ public:
     string GetVirusTotalReport(int pid);
 
 private:
-    void sortProcInfos(bool(*cmpFunc)(ProcInfo&, ProcInfo&));
+    void    sortProcInfos(bool(*cmpFunc)(ProcInfo&, ProcInfo&));
     // for update proc status
-    void setSysInfo(void);
-    double getCpuTime(ULL utime, ULL stime, ULL starttime, int seconds);
-    string getStartTime(ULL uptime, ULL stime);
-    string getUserName(char* path);
+    double  getUptime(void);
+    double  getCpuTime(UL utime, UL stime, ULL starttime);
+    string  getRunTime(ULL stime);
 
     //for virus total
     fileData &getFileData(string &fileName);
@@ -61,7 +60,6 @@ private:
     string &requestScan(string &fileName);
     Json::Value &parsingJson(string &data);
 
-    SysInfo *mSysInfo;
     vector<ProcInfo> *mProcInfos;
     Mode mMode;
 };
