@@ -30,7 +30,7 @@ private:
     void   executeHelp        (void);
     int    printArgs          (string input);
     void   initArgList        (string args);
-    string getNextArg         (void);
+    string *getNextArg        (void);
     
     struct argList {
         string argBuffer;
