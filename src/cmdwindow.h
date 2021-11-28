@@ -17,7 +17,7 @@ typedef struct CommandEntry {
 class CmdWindow : public Window
 {
 public:
-    CmdWindow(int endY, int endX, int begY, int begX);
+    CmdWindow(int endY, int endX, int begY, int begX, Command *cmd);
     void StartShell(mutex &mutPrintScr, mutex &mutGetch);
     
 private:

@@ -9,9 +9,9 @@
 
 using namespace std;
 
-CmdWindow::CmdWindow(int endY, int endX, int begY, int begX)
+CmdWindow::CmdWindow(int endY, int endX, int begY, int begX, Command *cmd)
     : Window(endY, endX, begY, begX)
-    , mCmd(new Command())
+    , mCmd(cmd)
 {
     mCmdEntry = new vector<CommandEntry>;
 
@@ -101,6 +101,8 @@ void CmdWindow::StartShell(mutex &mutPrintScr, mutex &mutGetch)
             bPrevSpace = false;
             break;
         }
+        if( mCmd->GetMode() == Command::Mode::EXIT )
+            return;
     }
 }
 
@@ -134,7 +136,7 @@ void CmdWindow::executeCommand(string &args)
             else if( cmd.compare("info") == 0 )
                 executeInfo();
             else if( cmd.compare("exit") == 0 )
-                system("kill -9 `pidof ./main`; reset");
+                mCmd->SetMode(Command::Mode::EXIT);
 
             break;
 

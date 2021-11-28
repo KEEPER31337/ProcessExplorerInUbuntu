@@ -7,6 +7,9 @@
 
 using namespace std;
 
+thread *infoWinThread;
+thread *cmdWinThread;
+
 InfoWindow *infoWindow;
 CmdWindow *cmdWindow;
 Command *cmd;
@@ -23,10 +26,10 @@ void InitWindow(void)
     mutPrintScr = new mutex;
     mutGetch = new mutex;
 
-    infoWindow = new InfoWindow(getmaxy(stdscr) - 11, getmaxx(stdscr), 0, 0);
-    cmdWindow = new CmdWindow(9, getmaxx(stdscr), getmaxy(stdscr) - 9, 0);
     cmd = new Command();
-
+    infoWindow = new InfoWindow(getmaxy(stdscr) - 11, getmaxx(stdscr), 0, 0);
+    cmdWindow = new CmdWindow(9, getmaxx(stdscr), getmaxy(stdscr) - 9, 0, cmd);
+    
     infoWindow->PrintTitle();
     for(int i=0; i<getmaxx(stdscr); i++)
         mvwaddch(stdscr, getmaxy(stdscr)-10, i, '-');
@@ -36,9 +39,8 @@ void InitWindow(void)
 
 void InfoWindowThreadFunc(void)
 {
-    while (true)
-    {
-        switch(cmd->GetMode())
+    while ( true ) {
+        switch( cmd->GetMode() )
         {
         case Command::Mode::PRINTPROCINFO:
             cmd->UpdateProcStat();
@@ -51,6 +53,8 @@ void InfoWindowThreadFunc(void)
             infoWindow->WindowClear();
             mutGetch->unlock();
             break;
+        case Command::Mode::EXIT:
+            return;
         default:
             break;
         }
@@ -71,11 +75,11 @@ void EndWindow(void)
 
 void Working(void)
 {
-    thread infoWinThread(InfoWindowThreadFunc);
-    thread cmdWinThread(CmdWindowThreadFunc);
-
-    infoWinThread.join();
-    cmdWinThread.join();
+    infoWinThread = new thread(InfoWindowThreadFunc);
+    cmdWinThread = new thread(CmdWindowThreadFunc);
+    
+    cmdWinThread->join();
+    infoWinThread->join();
 }
 
 int main(void)
