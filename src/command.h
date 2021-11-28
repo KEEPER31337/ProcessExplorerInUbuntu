@@ -23,7 +23,8 @@ public:
     enum Mode
     {
         PRINTPROCINFO,
-        CLEAR
+        CLEAR,
+        EXIT,
     };
     Command();
     // setting print mode
