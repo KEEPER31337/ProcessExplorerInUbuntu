@@ -154,7 +154,7 @@ void CmdWindow::executeInfo(void)
     ProcInfo information;
 
     if ( ( arg = getNextArg() ) == NULL ) {
-        printStr("wrong input");
+        printStr("wrong input : need parameter");
         return;
     }
     for ( int i=0; i<arg->size(); i++ ) {
@@ -184,13 +184,23 @@ void CmdWindow::executePath(void)
     string *arg;
 
     if ( ( arg = getNextArg() ) == NULL ) {
-        printStr("wrong input");
+        printStr("wrong input : need parameter");
         return;
     }
-    pid = stoi(*arg);
+    for ( int i=0; i<arg->size(); i++ ) {
+        if( !isdigit(arg->at(i)) ) {
+            printStr("wrong parameter : must be pid");
+            return;
+        }
+    }
+    if( arg->size() > 8 ) {
+        pid = -1;
+    }
+    else {
+        pid = stoi(*arg);
+    }
 
     printStr(mCmd->GetProcPath(pid));
-
 }
 
 void CmdWindow::executeVirusCheck(void)
